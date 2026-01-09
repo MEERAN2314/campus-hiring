@@ -1,0 +1,420 @@
+{% extends "base.html" %}
+
+{% block title %}Recruiter Dashboard - HireWave{% endblock %}
+
+{% block extra_css %}
+<style>
+.recruiter-dashboard {
+    padding: 2rem 0;
+}
+
+.dashboard-welcome {
+    background: linear-gradient(135deg, var(--primary-blue), var(--dark-blue));
+    color: var(--white);
+    padding: 2.5rem;
+    border-radius: 20px;
+    margin-bottom: 2rem;
+    box-shadow: var(--shadow-xl);
+    position: relative;
+    overflow: hidden;
+}
+
+.dashboard-welcome::before {
+    content: '';
+    position: absolute;
+    top: -50%;
+    right: -50%;
+    width: 100%;
+    height: 100%;
+    background: radial-gradient(circle, rgba(255, 255, 255, 0.1) 0%, transparent 70%);
+    animation: rotate 20s linear infinite;
+}
+
+.dashboard-welcome-content {
+    position: relative;
+    z-index: 1;
+}
+
+.dashboard-welcome h1 {
+    font-size: 2.2rem;
+    margin-bottom: 0.5rem;
+}
+
+.dashboard-welcome p {
+    opacity: 0.9;
+    font-size: 1.1rem;
+}
+
+.dashboard-stats {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+    gap: 1.5rem;
+    margin-bottom: 3rem;
+}
+
+.stat-card {
+    background: linear-gradient(135deg, var(--primary-blue), var(--dark-blue));
+    color: var(--white);
+    padding: 2rem;
+    border-radius: 16px;
+    text-align: center;
+    box-shadow: var(--shadow-lg);
+    transition: var(--transition);
+    position: relative;
+    overflow: hidden;
+    cursor: pointer;
+}
+
+.stat-card::before {
+    content: '';
+    position: absolute;
+    top: -50%;
+    right: -50%;
+    width: 100%;
+    height: 100%;
+    background: radial-gradient(circle, rgba(255, 255, 255, 0.2) 0%, transparent 70%);
+}
+
+.stat-card:hover {
+    transform: translateY(-8px) scale(1.02);
+    box-shadow: var(--shadow-xl);
+}
+
+.stat-card:nth-child(2) {
+    background: linear-gradient(135deg, #f59e0b, #d97706);
+}
+
+.stat-card:nth-child(3) {
+    background: linear-gradient(135deg, #8b5cf6, #7c3aed);
+}
+
+.stat-card:nth-child(4) {
+    background: linear-gradient(135deg, #10b981, #059669);
+}
+
+.stat-value {
+    font-size: 2.8rem;
+    font-weight: 800;
+    margin-bottom: 0.5rem;
+    position: relative;
+    z-index: 1;
+}
+
+.stat-label {
+    font-size: 1rem;
+    opacity: 0.95;
+    position: relative;
+    z-index: 1;
+    font-weight: 600;
+}
+
+.quick-actions {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: 1.5rem;
+    margin-bottom: 3rem;
+}
+
+.action-card {
+    background: var(--white);
+    border: 2px solid #e2e8f0;
+    border-radius: 16px;
+    padding: 2rem;
+    transition: var(--transition);
+    cursor: pointer;
+    text-align: center;
+}
+
+.action-card:hover {
+    border-color: var(--primary-blue);
+    box-shadow: var(--shadow-lg);
+    transform: translateY(-4px);
+}
+
+.action-icon {
+    width: 60px;
+    height: 60px;
+    background: linear-gradient(135deg, var(--primary-blue), var(--accent-blue));
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 0 auto 1rem;
+}
+
+.action-icon i {
+    color: var(--white);
+    width: 32px;
+    height: 32px;
+}
+
+.action-card h3 {
+    color: var(--dark-blue);
+    margin-bottom: 0.5rem;
+    font-size: 1.3rem;
+}
+
+.action-card p {
+    color: var(--gray);
+    font-size: 0.95rem;
+    margin-bottom: 1rem;
+}
+
+.recent-activity {
+    margin-top: 2rem;
+}
+
+.recent-activity h2 {
+    color: var(--dark-blue);
+    font-size: 2rem;
+    margin-bottom: 1.5rem;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.activity-list {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+}
+
+.activity-item {
+    background: var(--white);
+    border: 2px solid #e2e8f0;
+    border-radius: 12px;
+    padding: 1.5rem;
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    transition: var(--transition);
+}
+
+.activity-item:hover {
+    border-color: var(--primary-blue);
+    box-shadow: var(--shadow);
+}
+
+.activity-icon {
+    width: 48px;
+    height: 48px;
+    background: var(--light-blue);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+}
+
+.activity-icon i {
+    color: var(--primary-blue);
+    width: 24px;
+    height: 24px;
+}
+
+.activity-content {
+    flex: 1;
+}
+
+.activity-content h4 {
+    color: var(--dark-blue);
+    margin-bottom: 0.25rem;
+    font-size: 1.1rem;
+}
+
+.activity-content p {
+    color: var(--gray);
+    font-size: 0.9rem;
+}
+
+.empty-state {
+    text-align: center;
+    padding: 3rem;
+    color: var(--gray);
+}
+
+@media (max-width: 768px) {
+    .dashboard-stats {
+        grid-template-columns: repeat(2, 1fr);
+    }
+    
+    .quick-actions {
+        grid-template-columns: 1fr;
+    }
+}
+</style>
+{% endblock %}
+
+{% block content %}
+<section class="recruiter-dashboard">
+    <div class="container">
+        <div class="dashboard-welcome">
+            <div class="dashboard-welcome-content">
+                <h1>Welcome back, <span id="recruiterName">Recruiter</span>! 👋</h1>
+                <p>Manage your job postings and find the best talent</p>
+            </div>
+        </div>
+        
+        <div class="dashboard-stats">
+            <div class="stat-card" onclick="window.location.href='/recruiter/jobs'">
+                <div class="stat-value" id="totalJobs">0</div>
+                <div class="stat-label">Total Jobs</div>
+            </div>
+            <div class="stat-card" onclick="window.location.href='/recruiter/jobs'">
+                <div class="stat-value" id="activeJobs">0</div>
+                <div class="stat-label">Active Jobs</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-value" id="totalApplications">0</div>
+                <div class="stat-label">Total Applications</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-value" id="shortlistedCandidates">0</div>
+                <div class="stat-label">Shortlisted</div>
+            </div>
+        </div>
+        
+        <h2 style="color: var(--dark-blue); font-size: 1.8rem; margin-bottom: 1.5rem;">Quick Actions</h2>
+        <div class="quick-actions">
+            <div class="action-card" onclick="window.location.href='/recruiter/jobs'">
+                <div class="action-icon">
+                    <i data-lucide="plus-circle"></i>
+                </div>
+                <h3>Create New Job</h3>
+                <p>Post a new job opening and start receiving applications</p>
+                <button class="btn btn-primary">Get Started</button>
+            </div>
+            
+            <div class="action-card" onclick="window.location.href='/recruiter/jobs'">
+                <div class="action-icon">
+                    <i data-lucide="briefcase"></i>
+                </div>
+                <h3>Manage Jobs</h3>
+                <p>View and edit your existing job postings</p>
+                <button class="btn btn-outline">View Jobs</button>
+            </div>
+            
+            <div class="action-card" onclick="loadRecentApplications()">
+                <div class="action-icon">
+                    <i data-lucide="users"></i>
+                </div>
+                <h3>View Candidates</h3>
+                <p>Review applications and shortlist candidates</p>
+                <button class="btn btn-outline">View All</button>
+            </div>
+        </div>
+        
+        <div class="recent-activity">
+            <h2><i data-lucide="activity"></i> Recent Activity</h2>
+            <div id="activityList" class="activity-list">
+                <div class="loading">Loading recent activity...</div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<script>
+// Get user info
+const user = JSON.parse(localStorage.getItem('user') || '{}');
+
+// Redirect if not recruiter
+if (user.user_type !== 'recruiter') {
+    window.location.href = '/dashboard';
+}
+
+// Set recruiter name
+if (user.full_name) {
+    document.getElementById('recruiterName').textContent = user.full_name.split(' ')[0];
+}
+
+// Load dashboard data
+async function loadDashboard() {
+    const token = localStorage.getItem('token');
+    if (!token) {
+        window.location.href = '/login';
+        return;
+    }
+    
+    try {
+        // Load jobs
+        const jobsResponse = await fetch('/api/jobs', {
+            headers: { 'Authorization': `Bearer ${token}` }
+        });
+        
+        if (jobsResponse.ok) {
+            const jobs = await jobsResponse.json();
+            updateStats(jobs);
+            displayRecentActivity(jobs);
+        }
+    } catch (error) {
+        console.error('Error loading dashboard:', error);
+    }
+}
+
+function updateStats(jobs) {
+    document.getElementById('totalJobs').textContent = jobs.length;
+    document.getElementById('activeJobs').textContent = jobs.filter(j => j.status === 'active').length;
+    
+    // Calculate total applications
+    const totalApps = jobs.reduce((sum, job) => sum + (job.applications_count || 0), 0);
+    document.getElementById('totalApplications').textContent = totalApps;
+    
+    // For now, set shortlisted to 0 (would need to fetch from applications API)
+    document.getElementById('shortlistedCandidates').textContent = 0;
+}
+
+function displayRecentActivity(jobs) {
+    const container = document.getElementById('activityList');
+    
+    if (jobs.length === 0) {
+        container.innerHTML = '<div class="empty-state">No recent activity. Create your first job to get started!</div>';
+        return;
+    }
+    
+    // Sort jobs by created_at (most recent first)
+    const recentJobs = jobs.sort((a, b) => new Date(b.created_at) - new Date(a.created_at)).slice(0, 5);
+    
+    container.innerHTML = recentJobs.map(job => `
+        <div class="activity-item" onclick="window.location.href='/recruiter/candidates/${job._id || job.id}'">
+            <div class="activity-icon">
+                <i data-lucide="${job.status === 'active' ? 'check-circle' : 'clock'}"></i>
+            </div>
+            <div class="activity-content">
+                <h4>${job.title}</h4>
+                <p>
+                    ${job.status === 'active' ? 'Active' : 'Draft'} • 
+                    ${job.applications_count || 0} applications • 
+                    Created ${formatDate(job.created_at)}
+                </p>
+            </div>
+            <button class="btn btn-outline btn-small">View</button>
+        </div>
+    `).join('');
+    
+    // Reinitialize icons
+    lucide.createIcons();
+}
+
+function formatDate(dateString) {
+    const date = new Date(dateString);
+    const now = new Date();
+    const diffTime = Math.abs(now - date);
+    const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+    
+    if (diffDays === 0) return 'today';
+    if (diffDays === 1) return 'yesterday';
+    if (diffDays < 7) return `${diffDays} days ago`;
+    if (diffDays < 30) return `${Math.floor(diffDays / 7)} weeks ago`;
+    return date.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
+}
+
+function loadRecentApplications() {
+    // For now, just redirect to jobs page
+    // In future, could show a modal with recent applications
+    window.location.href = '/recruiter/jobs';
+}
+
+// Load dashboard on page load
+loadDashboard();
+</script>
+{% endblock %}
