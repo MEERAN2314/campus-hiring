@@ -203,6 +203,54 @@
     gap: 1rem;
     padding-top: 1rem;
     border-top: 1px solid #e2e8f0;
+    flex-wrap: wrap;
+}
+
+.shortlisted-banner {
+    width: 100%;
+    background: linear-gradient(135deg, #d1fae5, #a7f3d0);
+    border: 2px solid var(--success);
+    border-radius: 12px;
+    padding: 1.25rem;
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    margin-bottom: 1rem;
+    animation: slideIn 0.5s ease;
+}
+
+.shortlisted-icon {
+    width: 50px;
+    height: 50px;
+    background: var(--success);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+}
+
+.shortlisted-icon i {
+    color: var(--white);
+    width: 28px;
+    height: 28px;
+}
+
+.shortlisted-message {
+    flex: 1;
+}
+
+.shortlisted-message strong {
+    color: #065f46;
+    font-size: 1.2rem;
+    display: block;
+    margin-bottom: 0.25rem;
+}
+
+.shortlisted-message p {
+    color: #047857;
+    margin: 0;
+    font-size: 0.95rem;
 }
 
 .empty-state-card {
@@ -383,8 +431,16 @@ function displayApplications(applications) {
                 ` : app.status === 'assessment_completed' || app.status === 'under_review' ? `
                     <a href="/results/${app._id || app.id}" class="btn btn-primary">View Results →</a>
                 ` : app.status === 'shortlisted' ? `
+                    <div class="shortlisted-banner">
+                        <div class="shortlisted-icon">
+                            <i data-lucide="trophy" class="icon icon-lg"></i>
+                        </div>
+                        <div class="shortlisted-message">
+                            <strong>Congratulations!</strong>
+                            <p>You've been shortlisted for this position</p>
+                        </div>
+                    </div>
                     <a href="/results/${app._id || app.id}" class="btn btn-primary">View Results →</a>
-                    <span style="color: var(--success); font-weight: 600;">Congratulations!</span>
                 ` : ''}
                 ${app.job ? `
                     <a href="/jobs/${app.job_id}" class="btn btn-outline">View Job Details</a>

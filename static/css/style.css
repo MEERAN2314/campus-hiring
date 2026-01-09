@@ -216,15 +216,33 @@ body::before {
 }
 
 .btn-outline {
-    background: transparent;
+    background: rgba(255, 255, 255, 0.95);
     color: var(--primary-blue);
-    border: 2px solid var(--primary-blue);
+    border: 2px solid rgba(255, 255, 255, 0.3);
+    font-weight: 600;
 }
 
 .btn-outline:hover {
-    background: var(--primary-blue);
-    color: var(--white);
+    background: var(--white);
+    color: var(--dark-blue);
+    border-color: var(--white);
     transform: translateY(-2px);
+    box-shadow: var(--shadow-lg);
+}
+
+/* Special styling for outline buttons on dark backgrounds */
+.hero .btn-outline {
+    background: rgba(255, 255, 255, 0.95);
+    color: var(--primary-blue);
+    border: 2px solid var(--white);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+}
+
+.hero .btn-outline:hover {
+    background: var(--white);
+    color: var(--dark-blue);
+    transform: translateY(-3px);
+    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.25);
 }
 
 .btn-danger {
@@ -322,6 +340,12 @@ body::before {
     gap: 1rem;
     justify-content: center;
     animation: fadeInUp 0.8s ease 0.4s both;
+    position: relative;
+    z-index: 10;
+}
+
+.hero-buttons .btn {
+    min-width: 180px;
 }
 
 @keyframes fadeInUp {
