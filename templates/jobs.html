@@ -1,0 +1,97 @@
+{% extends "base.html" %}
+
+{% block title %}Browse Jobs - Campus Hiring Platform{% endblock %}
+
+{% block content %}
+<section class="jobs-section">
+    <div class="container">
+        <h1>Available Jobs</h1>
+        
+        <div class="jobs-filters">
+            <select id="jobTypeFilter" onchange="filterJobs()">
+                <option value="">All Types</option>
+                <option value="technical">Technical</option>
+                <option value="non_technical">Non-Technical</option>
+            </select>
+            
+            <input type="text" id="searchInput" placeholder="Search jobs..." onkeyup="filterJobs()">
+        </div>
+        
+        <div id="jobsList" class="jobs-grid">
+            <div class="loading">Loading jobs...</div>
+        </div>
+    </div>
+</section>
+
+<script>
+let allJobs = [];
+
+async function loadJobs() {
+    try {
+        const response = await fetch('/api/jobs?status=active');
+        
+        if (response.ok) {
+            allJobs = await response.json();
+            displayJobs(allJobs);
+        } else {
+            document.getElementById('jobsList').innerHTML = '<p>Failed to load jobs</p>';
+        }
+    } catch (error) {
+        document.getElementById('jobsList').innerHTML = '<p>Error loading jobs</p>';
+    }
+}
+
+function displayJobs(jobs) {
+    const container = document.getElementById('jobsList');
+    
+    if (jobs.length === 0) {
+        container.innerHTML = '<p class="empty-state">No jobs available at the moment</p>';
+        return;
+    }
+    
+    container.innerHTML = jobs.map(job => `
+        <div class="job-card">
+            <div class="job-header">
+                <h3>${job.title}</h3>
+                <span class="job-type-badge">${job.job_type}</span>
+            </div>
+            <p class="job-company">${job.company_name}</p>
+            <p class="job-location">📍 ${job.location}</p>
+            <div class="job-skills">
+                ${job.required_skills.slice(0, 3).map(skill => `<span class="skill-tag">${skill}</span>`).join('')}
+                ${job.required_skills.length > 3 ? `<span class="skill-tag">+${job.required_skills.length - 3}</span>` : ''}
+            </div>
+            <p class="job-description">${job.description.substring(0, 150)}...</p>
+            <div class="job-footer">
+                <span class="job-date">${new Date(job.created_at).toLocaleDateString()}</span>
+                <a href="/jobs/${job.id}" class="btn btn-primary btn-small">View Details</a>
+            </div>
+        </div>
+    `).join('');
+}
+
+function filterJobs() {
+    const typeFilter = document.getElementById('jobTypeFilter').value;
+    const searchTerm = document.getElementById('searchInput').value.toLowerCase();
+    
+    let filtered = allJobs;
+    
+    if (typeFilter) {
+        filtered = filtered.filter(job => job.job_type === typeFilter);
+    }
+    
+    if (searchTerm) {
+        filtered = filtered.filter(job => 
+            job.title.toLowerCase().includes(searchTerm) ||
+            job.description.toLowerCase().includes(searchTerm) ||
+            job.company_name.toLowerCase().includes(searchTerm) ||
+            job.required_skills.some(skill => skill.toLowerCase().includes(searchTerm))
+        );
+    }
+    
+    displayJobs(filtered);
+}
+
+loadJobs();
+</script>
+{% endblock %}

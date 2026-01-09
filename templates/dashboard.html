@@ -1,0 +1,100 @@
+{% extends "base.html" %}
+
+{% block title %}Dashboard - Campus Hiring Platform{% endblock %}
+
+{% block content %}
+<section class="dashboard-section">
+    <div class="container">
+        <h1>My Dashboard</h1>
+        
+        <div class="dashboard-stats">
+            <div class="stat-card">
+                <div class="stat-value" id="appliedCount">0</div>
+                <div class="stat-label">Applications</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-value" id="pendingCount">0</div>
+                <div class="stat-label">Pending</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-value" id="completedCount">0</div>
+                <div class="stat-label">Completed</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-value" id="shortlistedCount">0</div>
+                <div class="stat-label">Shortlisted</div>
+            </div>
+        </div>
+        
+        <div class="dashboard-content">
+            <h2>My Applications</h2>
+            <div id="applicationsList" class="applications-list">
+                <div class="loading">Loading...</div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<script>
+async function loadDashboard() {
+    const token = localStorage.getItem('token');
+    if (!token) {
+        window.location.href = '/login';
+        return;
+    }
+    
+    try {
+        const response = await fetch('/api/applications', {
+            headers: {
+                'Authorization': `Bearer ${token}`
+            }
+        });
+        
+        if (response.ok) {
+            const applications = await response.json();
+            displayApplications(applications);
+            updateStats(applications);
+        } else {
+            document.getElementById('applicationsList').innerHTML = '<p>Failed to load applications</p>';
+        }
+    } catch (error) {
+        document.getElementById('applicationsList').innerHTML = '<p>Error loading applications</p>';
+    }
+}
+
+function displayApplications(applications) {
+    const container = document.getElementById('applicationsList');
+    
+    if (applications.length === 0) {
+        container.innerHTML = '<p class="empty-state">No applications yet. <a href="/jobs">Browse jobs</a></p>';
+        return;
+    }
+    
+    container.innerHTML = applications.map(app => `
+        <div class="application-card">
+            <div class="application-header">
+                <h3>${app.job_id}</h3>
+                <span class="status-badge status-${app.status}">${app.status}</span>
+            </div>
+            <p class="application-date">Applied: ${new Date(app.applied_at).toLocaleDateString()}</p>
+            <div class="application-actions">
+                ${app.status === 'applied' ? `
+                    <a href="/assessment/${app.id}" class="btn btn-primary btn-small">Start Assessment</a>
+                ` : app.status === 'assessment_completed' || app.status === 'under_review' ? `
+                    <a href="/results/${app.id}" class="btn btn-outline btn-small">View Results</a>
+                ` : ''}
+            </div>
+        </div>
+    `).join('');
+}
+
+function updateStats(applications) {
+    document.getElementById('appliedCount').textContent = applications.length;
+    document.getElementById('pendingCount').textContent = applications.filter(a => a.status === 'applied' || a.status === 'assessment_pending').length;
+    document.getElementById('completedCount').textContent = applications.filter(a => a.status === 'assessment_completed' || a.status === 'under_review').length;
+    document.getElementById('shortlistedCount').textContent = applications.filter(a => a.status === 'shortlisted').length;
+}
+
+loadDashboard();
+</script>
+{% endblock %}

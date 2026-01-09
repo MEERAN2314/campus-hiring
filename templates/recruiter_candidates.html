@@ -1,0 +1,156 @@
+{% extends "base.html" %}
+
+{% block title %}Candidates - Recruiter Dashboard{% endblock %}
+
+{% block content %}
+<section class="recruiter-section">
+    <div class="container">
+        <div class="recruiter-header">
+            <h1>Candidates</h1>
+            <button onclick="loadRankings()" class="btn btn-primary">Refresh Rankings</button>
+        </div>
+        
+        <div id="candidatesList" class="candidates-list">
+            <div class="loading">Loading candidates...</div>
+        </div>
+    </div>
+</section>
+
+<script>
+const jobId = "{{ job_id }}";
+
+async function loadRankings() {
+    const token = localStorage.getItem('token');
+    if (!token) {
+        window.location.href = '/login';
+        return;
+    }
+    
+    try {
+        const response = await fetch(`/api/results/job/${jobId}/rankings`, {
+            headers: { 'Authorization': `Bearer ${token}` }
+        });
+        
+        if (response.ok) {
+            const results = await response.json();
+            displayCandidates(results);
+        } else {
+            document.getElementById('candidatesList').innerHTML = '<p>No results available yet</p>';
+        }
+    } catch (error) {
+        document.getElementById('candidatesList').innerHTML = '<p>Error loading candidates</p>';
+    }
+}
+
+function displayCandidates(results) {
+    const container = document.getElementById('candidatesList');
+    
+    if (results.length === 0) {
+        container.innerHTML = '<p class="empty-state">No candidates have completed the assessment yet</p>';
+        return;
+    }
+    
+    container.innerHTML = `
+        <table class="candidates-table">
+            <thead>
+                <tr>
+                    <th>Rank</th>
+                    <th>Candidate</th>
+                    <th>Score</th>
+                    <th>Top Skills</th>
+                    <th>AI Confidence</th>
+                    <th>Status</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                ${results.map(result => `
+                    <tr class="${result.is_shortlisted ? 'shortlisted-row' : ''}">
+                        <td><strong>#${result.rank}</strong></td>
+                        <td>
+                            <div class="candidate-info">
+                                <div class="candidate-name">Candidate ${result.candidate_id.substring(0, 8)}</div>
+                            </div>
+                        </td>
+                        <td>
+                            <div class="score-badge">${result.percentage}%</div>
+                        </td>
+                        <td>
+                            <div class="skills-mini">
+                                ${result.feedback_report.skill_scores.slice(0, 2).map(skill => 
+                                    `<span class="skill-tag-mini">${skill.skill_name}: ${skill.score}%</span>`
+                                ).join('')}
+                            </div>
+                        </td>
+                        <td>${(result.ai_reasoning.confidence_score * 100).toFixed(0)}%</td>
+                        <td>
+                            <span class="status-badge ${result.is_shortlisted ? 'status-shortlisted' : 'status-pending'}">
+                                ${result.is_shortlisted ? 'Shortlisted' : 'Under Review'}
+                            </span>
+                        </td>
+                        <td>
+                            <button onclick="viewDetails('${result.id}')" class="btn btn-outline btn-small">View</button>
+                            ${!result.is_shortlisted ? 
+                                `<button onclick="shortlist('${result.application_id}')" class="btn btn-primary btn-small">Shortlist</button>` :
+                                `<button onclick="reject('${result.application_id}')" class="btn btn-danger btn-small">Reject</button>`
+                            }
+                        </td>
+                    </tr>
+                `).join('')}
+            </tbody>
+        </table>
+    `;
+}
+
+function viewDetails(resultId) {
+    // Open modal or navigate to detailed view
+    alert('Detailed view coming soon! Result ID: ' + resultId);
+}
+
+async function shortlist(applicationId) {
+    const token = localStorage.getItem('token');
+    
+    try {
+        const response = await fetch(`/api/applications/${applicationId}/shortlist`, {
+            method: 'POST',
+            headers: { 'Authorization': `Bearer ${token}` }
+        });
+        
+        if (response.ok) {
+            alert('Candidate shortlisted!');
+            loadRankings();
+        } else {
+            alert('Failed to shortlist candidate');
+        }
+    } catch (error) {
+        alert('Error shortlisting candidate');
+    }
+}
+
+async function reject(applicationId) {
+    if (!confirm('Are you sure you want to reject this candidate?')) {
+        return;
+    }
+    
+    const token = localStorage.getItem('token');
+    
+    try {
+        const response = await fetch(`/api/applications/${applicationId}/reject`, {
+            method: 'POST',
+            headers: { 'Authorization': `Bearer ${token}` }
+        });
+        
+        if (response.ok) {
+            alert('Candidate rejected');
+            loadRankings();
+        } else {
+            alert('Failed to reject candidate');
+        }
+    } catch (error) {
+        alert('Error rejecting candidate');
+    }
+}
+
+loadRankings();
+</script>
+{% endblock %}

@@ -1,0 +1,118 @@
+{% extends "base.html" %}
+
+{% block title %}Job Details - Campus Hiring Platform{% endblock %}
+
+{% block content %}
+<section class="job-detail-section">
+    <div class="container">
+        <div id="jobDetail" class="job-detail-content">
+            <div class="loading">Loading job details...</div>
+        </div>
+    </div>
+</section>
+
+<script>
+const jobId = "{{ job_id }}";
+
+async function loadJobDetail() {
+    try {
+        const response = await fetch(`/api/jobs/${jobId}`);
+        
+        if (response.ok) {
+            const job = await response.json();
+            displayJobDetail(job);
+        } else {
+            document.getElementById('jobDetail').innerHTML = '<p>Job not found</p>';
+        }
+    } catch (error) {
+        document.getElementById('jobDetail').innerHTML = '<p>Error loading job</p>';
+    }
+}
+
+function displayJobDetail(job) {
+    const container = document.getElementById('jobDetail');
+    
+    container.innerHTML = `
+        <div class="job-detail-header">
+            <h1>${job.title}</h1>
+            <span class="job-type-badge">${job.job_type}</span>
+        </div>
+        
+        <div class="job-detail-meta">
+            <p><strong>Company:</strong> ${job.company_name}</p>
+            <p><strong>Location:</strong> ${job.location}</p>
+            <p><strong>Experience:</strong> ${job.experience_level}</p>
+            ${job.salary_range ? `<p><strong>Salary:</strong> ${job.salary_range}</p>` : ''}
+            <p><strong>Vacancies:</strong> ${job.vacancies}</p>
+        </div>
+        
+        <div class="job-detail-section">
+            <h2>Description</h2>
+            <p>${job.description}</p>
+        </div>
+        
+        <div class="job-detail-section">
+            <h2>Required Skills</h2>
+            <div class="skills-list">
+                ${job.required_skills.map(skill => `<span class="skill-tag">${skill}</span>`).join('')}
+            </div>
+        </div>
+        
+        ${job.target_colleges.length > 0 ? `
+            <div class="job-detail-section">
+                <h2>Target Colleges</h2>
+                <ul>
+                    ${job.target_colleges.map(college => `<li>${college}</li>`).join('')}
+                </ul>
+            </div>
+        ` : ''}
+        
+        <div class="job-detail-actions">
+            <button onclick="applyToJob()" class="btn btn-primary btn-large" id="applyBtn">Apply Now</button>
+        </div>
+    `;
+}
+
+async function applyToJob() {
+    const token = localStorage.getItem('token');
+    if (!token) {
+        window.location.href = '/login';
+        return;
+    }
+    
+    const btn = document.getElementById('applyBtn');
+    btn.disabled = true;
+    btn.textContent = 'Applying...';
+    
+    try {
+        const response = await fetch('/api/applications', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${token}`
+            },
+            body: JSON.stringify({
+                job_id: jobId,
+                candidate_id: JSON.parse(localStorage.getItem('user')).id
+            })
+        });
+        
+        if (response.ok) {
+            alert('Application submitted successfully!');
+            window.location.href = '/dashboard';
+        } else {
+            const data = await response.json();
+            alert(data.detail || 'Failed to apply');
+            btn.disabled = false;
+            btn.textContent = 'Apply Now';
+        }
+    } catch (error) {
+        alert('Error applying to job');
+        btn.disabled = false;
+        btn.textContent = 'Apply Now';
+    }
+}
+
+loadJobDetail();
+</script>
+{% endblock %}

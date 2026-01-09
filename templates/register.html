@@ -1,0 +1,134 @@
+{% extends "base.html" %}
+
+{% block title %}Register - Campus Hiring Platform{% endblock %}
+
+{% block content %}
+<section class="auth-section">
+    <div class="container">
+        <div class="auth-card">
+            <h2>Create Account</h2>
+            <p class="auth-subtitle">Join our platform today</p>
+            
+            <form id="registerForm" class="auth-form">
+                <div class="form-group">
+                    <label for="userType">I am a</label>
+                    <select id="userType" name="user_type" required>
+                        <option value="">Select...</option>
+                        <option value="candidate">Student/Candidate</option>
+                        <option value="recruiter">Recruiter</option>
+                    </select>
+                </div>
+                
+                <div class="form-group">
+                    <label for="fullName">Full Name</label>
+                    <input type="text" id="fullName" name="full_name" required placeholder="John Doe">
+                </div>
+                
+                <div class="form-group">
+                    <label for="email">Email</label>
+                    <input type="email" id="email" name="email" required placeholder="your@email.com">
+                </div>
+                
+                <div class="form-group">
+                    <label for="phone">Phone (Optional)</label>
+                    <input type="tel" id="phone" name="phone" placeholder="+1234567890">
+                </div>
+                
+                <div class="form-group" id="companyGroup" style="display: none;">
+                    <label for="companyName">Company Name</label>
+                    <input type="text" id="companyName" name="company_name" placeholder="Your Company">
+                </div>
+                
+                <div class="form-group" id="collegeGroup" style="display: none;">
+                    <label for="collegeName">College Name</label>
+                    <input type="text" id="collegeName" name="college_name" placeholder="Your College">
+                </div>
+                
+                <div class="form-group">
+                    <label for="password">Password</label>
+                    <input type="password" id="password" name="password" required placeholder="••••••••" minlength="6">
+                </div>
+                
+                <div id="errorMessage" class="error-message" style="display: none;"></div>
+                
+                <button type="submit" class="btn btn-primary btn-block">Register</button>
+            </form>
+            
+            <p class="auth-footer">
+                Already have an account? <a href="/login">Login here</a>
+            </p>
+        </div>
+    </div>
+</section>
+
+<script>
+document.getElementById('userType').addEventListener('change', (e) => {
+    const userType = e.target.value;
+    const companyGroup = document.getElementById('companyGroup');
+    const collegeGroup = document.getElementById('collegeGroup');
+    
+    if (userType === 'recruiter') {
+        companyGroup.style.display = 'block';
+        collegeGroup.style.display = 'none';
+        document.getElementById('companyName').required = true;
+        document.getElementById('collegeName').required = false;
+    } else if (userType === 'candidate') {
+        companyGroup.style.display = 'none';
+        collegeGroup.style.display = 'block';
+        document.getElementById('companyName').required = false;
+        document.getElementById('collegeName').required = true;
+    } else {
+        companyGroup.style.display = 'none';
+        collegeGroup.style.display = 'none';
+    }
+});
+
+document.getElementById('registerForm').addEventListener('submit', async (e) => {
+    e.preventDefault();
+    
+    const formData = {
+        user_type: document.getElementById('userType').value,
+        full_name: document.getElementById('fullName').value,
+        email: document.getElementById('email').value,
+        phone: document.getElementById('phone').value || null,
+        password: document.getElementById('password').value,
+        company_name: document.getElementById('companyName').value || null,
+        college_name: document.getElementById('collegeName').value || null,
+        skills: []
+    };
+    
+    const errorDiv = document.getElementById('errorMessage');
+    
+    try {
+        const response = await fetch('/api/auth/register', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify(formData)
+        });
+        
+        const data = await response.json();
+        
+        if (response.ok) {
+            // Store token and user info
+            localStorage.setItem('token', data.access_token);
+            localStorage.setItem('user', JSON.stringify(data.user));
+            
+            // Redirect based on user type
+            if (data.user.user_type === 'recruiter' || data.user.user_type === 'admin') {
+                window.location.href = '/recruiter/jobs';
+            } else {
+                window.location.href = '/dashboard';
+            }
+        } else {
+            errorDiv.textContent = data.detail || 'Registration failed';
+            errorDiv.style.display = 'block';
+        }
+    } catch (error) {
+        errorDiv.textContent = 'An error occurred. Please try again.';
+        errorDiv.style.display = 'block';
+    }
+});
+</script>
+{% endblock %}

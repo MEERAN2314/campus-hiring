@@ -1,0 +1,64 @@
+{% extends "base.html" %}
+
+{% block title %}Home - Campus Hiring Platform{% endblock %}
+
+{% block content %}
+<section class="hero">
+    <div class="container">
+        <div class="hero-content">
+            <h1 class="hero-title">AI-Powered Campus Hiring</h1>
+            <p class="hero-subtitle">Fair, skill-based recruitment with intelligent assessments and personalized feedback</p>
+            <div class="hero-buttons">
+                <a href="/register" class="btn btn-primary btn-large">Get Started</a>
+                <a href="/jobs" class="btn btn-outline btn-large">Browse Jobs</a>
+            </div>
+        </div>
+    </div>
+</section>
+
+<section class="features">
+    <div class="container">
+        <h2 class="section-title">Why Choose Us?</h2>
+        <div class="features-grid">
+            <div class="feature-card">
+                <div class="feature-icon">🤖</div>
+                <h3>AI-Powered Assessments</h3>
+                <p>Intelligent question generation tailored to each role and skill level</p>
+            </div>
+            <div class="feature-card">
+                <div class="feature-icon">📊</div>
+                <h3>Deep Code Analysis</h3>
+                <p>Evaluate correctness, efficiency, readability, and problem-solving approach</p>
+            </div>
+            <div class="feature-card">
+                <div class="feature-icon">💡</div>
+                <h3>Personalized Feedback</h3>
+                <p>Every candidate gets detailed improvement plans and learning resources</p>
+            </div>
+            <div class="feature-card">
+                <div class="feature-icon">⚖️</div>
+                <h3>Bias-Free Hiring</h3>
+                <p>AI actively detects and prevents bias for fair evaluation</p>
+            </div>
+            <div class="feature-card">
+                <div class="feature-icon">⚡</div>
+                <h3>Real-Time Insights</h3>
+                <p>Live monitoring and instant analytics for recruiters</p>
+            </div>
+            <div class="feature-card">
+                <div class="feature-icon">🎯</div>
+                <h3>Skill-Based Ranking</h3>
+                <p>Find the right candidates, not just toppers</p>
+            </div>
+        </div>
+    </div>
+</section>
+
+<section class="cta">
+    <div class="container">
+        <h2>Ready to Transform Your Campus Hiring?</h2>
+        <p>Join hundreds of companies and thousands of students</p>
+        <a href="/register" class="btn btn-primary btn-large">Start Free Trial</a>
+    </div>
+</section>
+{% endblock %}

@@ -1,0 +1,220 @@
+{% extends "base.html" %}
+
+{% block title %}My Jobs - Recruiter Dashboard{% endblock %}
+
+{% block content %}
+<section class="recruiter-section">
+    <div class="container">
+        <div class="recruiter-header">
+            <h1>My Job Postings</h1>
+            <button onclick="showCreateJobModal()" class="btn btn-primary">Create New Job</button>
+        </div>
+        
+        <div id="jobsList" class="recruiter-jobs-list">
+            <div class="loading">Loading jobs...</div>
+        </div>
+    </div>
+</section>
+
+<div id="createJobModal" class="modal" style="display: none;">
+    <div class="modal-content">
+        <span class="modal-close" onclick="closeCreateJobModal()">&times;</span>
+        <h2>Create New Job</h2>
+        
+        <form id="createJobForm">
+            <div class="form-group">
+                <label>Job Title</label>
+                <input type="text" name="title" required>
+            </div>
+            
+            <div class="form-group">
+                <label>Job Type</label>
+                <select name="job_type" required>
+                    <option value="technical">Technical</option>
+                    <option value="non_technical">Non-Technical</option>
+                </select>
+            </div>
+            
+            <div class="form-group">
+                <label>Description</label>
+                <textarea name="description" rows="4" required></textarea>
+            </div>
+            
+            <div class="form-group">
+                <label>Required Skills (comma-separated)</label>
+                <input type="text" name="required_skills" required>
+            </div>
+            
+            <div class="form-group">
+                <label>Experience Level</label>
+                <input type="text" name="experience_level" value="Fresher" required>
+            </div>
+            
+            <div class="form-group">
+                <label>Location</label>
+                <input type="text" name="location" required>
+            </div>
+            
+            <div class="form-group">
+                <label>Vacancies</label>
+                <input type="number" name="vacancies" value="1" required>
+            </div>
+            
+            <button type="submit" class="btn btn-primary">Create Job</button>
+        </form>
+    </div>
+</div>
+
+<script>
+async function loadJobs() {
+    const token = localStorage.getItem('token');
+    if (!token) {
+        window.location.href = '/login';
+        return;
+    }
+    
+    try {
+        const response = await fetch('/api/jobs', {
+            headers: { 'Authorization': `Bearer ${token}` }
+        });
+        
+        if (response.ok) {
+            const jobs = await response.json();
+            displayJobs(jobs);
+        }
+    } catch (error) {
+        document.getElementById('jobsList').innerHTML = '<p>Error loading jobs</p>';
+    }
+}
+
+function displayJobs(jobs) {
+    const container = document.getElementById('jobsList');
+    
+    if (jobs.length === 0) {
+        container.innerHTML = '<p class="empty-state">No jobs yet. Create your first job!</p>';
+        return;
+    }
+    
+    container.innerHTML = jobs.map(job => `
+        <div class="recruiter-job-card">
+            <div class="job-header">
+                <h3>${job.title}</h3>
+                <span class="status-badge status-${job.status}">${job.status}</span>
+            </div>
+            <p>${job.description.substring(0, 150)}...</p>
+            <div class="job-stats">
+                <span>📊 ${job.applications_count} Applications</span>
+                <span>📍 ${job.location}</span>
+            </div>
+            <div class="job-actions">
+                ${!job.assessment_id ? `
+                    <button onclick="createAssessment('${job.id}')" class="btn btn-primary btn-small">Create Assessment</button>
+                ` : job.status === 'draft' ? `
+                    <button onclick="publishJob('${job.id}')" class="btn btn-primary btn-small">Publish Job</button>
+                ` : ''}
+                <a href="/recruiter/candidates/${job.id}" class="btn btn-outline btn-small">View Candidates</a>
+            </div>
+        </div>
+    `).join('');
+}
+
+function showCreateJobModal() {
+    document.getElementById('createJobModal').style.display = 'flex';
+}
+
+function closeCreateJobModal() {
+    document.getElementById('createJobModal').style.display = 'none';
+}
+
+document.getElementById('createJobForm').addEventListener('submit', async (e) => {
+    e.preventDefault();
+    
+    const formData = new FormData(e.target);
+    const data = {
+        title: formData.get('title'),
+        job_type: formData.get('job_type'),
+        description: formData.get('description'),
+        required_skills: formData.get('required_skills').split(',').map(s => s.trim()),
+        experience_level: formData.get('experience_level'),
+        location: formData.get('location'),
+        vacancies: parseInt(formData.get('vacancies')),
+        target_colleges: []
+    };
+    
+    const token = localStorage.getItem('token');
+    
+    try {
+        const response = await fetch('/api/jobs', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${token}`
+            },
+            body: JSON.stringify(data)
+        });
+        
+        if (response.ok) {
+            closeCreateJobModal();
+            loadJobs();
+        } else {
+            alert('Failed to create job');
+        }
+    } catch (error) {
+        alert('Error creating job');
+    }
+});
+
+async function createAssessment(jobId) {
+    const token = localStorage.getItem('token');
+    
+    if (!confirm('Create AI-generated assessment for this job?')) {
+        return;
+    }
+    
+    try {
+        const response = await fetch('/api/assessments', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${token}`
+            },
+            body: JSON.stringify({
+                job_id: jobId,
+                auto_generate: true
+            })
+        });
+        
+        if (response.ok) {
+            alert('Assessment created successfully!');
+            loadJobs();
+        } else {
+            alert('Failed to create assessment');
+        }
+    } catch (error) {
+        alert('Error creating assessment');
+    }
+}
+
+async function publishJob(jobId) {
+    const token = localStorage.getItem('token');
+    
+    try {
+        const response = await fetch(`/api/jobs/${jobId}/publish`, {
+            method: 'POST',
+            headers: { 'Authorization': `Bearer ${token}` }
+        });
+        
+        if (response.ok) {
+            alert('Job published successfully!');
+            loadJobs();
+        } else {
+            alert('Failed to publish job');
+        }
+    } catch (error) {
+        alert('Error publishing job');
+    }
+}
+
+loadJobs();
+</script>
+{% endblock %}

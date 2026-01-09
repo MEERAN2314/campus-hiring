@@ -1,0 +1,142 @@
+{% extends "base.html" %}
+
+{% block title %}Results - Campus Hiring Platform{% endblock %}
+
+{% block content %}
+<section class="results-section">
+    <div class="container">
+        <div id="resultsContent">
+            <div class="loading">Loading results...</div>
+        </div>
+    </div>
+</section>
+
+<script>
+const applicationId = "{{ application_id }}";
+
+async function loadResults() {
+    const token = localStorage.getItem('token');
+    if (!token) {
+        window.location.href = '/login';
+        return;
+    }
+    
+    try {
+        const response = await fetch(`/api/results/application/${applicationId}`, {
+            headers: { 'Authorization': `Bearer ${token}` }
+        });
+        
+        if (response.ok) {
+            const result = await response.json();
+            displayResults(result);
+        } else {
+            document.getElementById('resultsContent').innerHTML = 
+                '<div class="results-pending"><h2>Results Pending</h2><p>Your assessment is being evaluated by our AI. Results will be available shortly.</p></div>';
+        }
+    } catch (error) {
+        document.getElementById('resultsContent').innerHTML = '<p>Error loading results</p>';
+    }
+}
+
+function displayResults(result) {
+    const container = document.getElementById('resultsContent');
+    
+    container.innerHTML = `
+        <div class="results-header">
+            <h1>Assessment Results</h1>
+            ${result.is_shortlisted ? '<span class="shortlisted-badge">✓ Shortlisted</span>' : ''}
+        </div>
+        
+        <div class="results-score-card">
+            <div class="score-circle">
+                <svg viewBox="0 0 200 200">
+                    <circle cx="100" cy="100" r="90" fill="none" stroke="#e0e0e0" stroke-width="20"/>
+                    <circle cx="100" cy="100" r="90" fill="none" stroke="#2563eb" stroke-width="20"
+                            stroke-dasharray="${result.percentage * 5.65} 565"
+                            transform="rotate(-90 100 100)"/>
+                </svg>
+                <div class="score-text">
+                    <div class="score-value">${result.percentage}%</div>
+                    <div class="score-label">Overall Score</div>
+                </div>
+            </div>
+            
+            <div class="score-details">
+                <p><strong>Points Earned:</strong> ${result.total_score} / ${result.max_score}</p>
+                ${result.rank ? `<p><strong>Rank:</strong> ${result.rank} / ${result.total_candidates}</p>` : ''}
+            </div>
+        </div>
+        
+        <div class="results-section">
+            <h2>Skill Analysis</h2>
+            <div class="skills-radar">
+                ${result.feedback_report.skill_scores.map(skill => `
+                    <div class="skill-bar">
+                        <div class="skill-info">
+                            <span class="skill-name">${skill.skill_name}</span>
+                            <span class="skill-level">${skill.level}</span>
+                        </div>
+                        <div class="skill-progress">
+                            <div class="skill-progress-bar" style="width: ${skill.score}%"></div>
+                        </div>
+                        <span class="skill-score">${skill.score}%</span>
+                    </div>
+                `).join('')}
+            </div>
+        </div>
+        
+        <div class="results-section">
+            <h2>Your Strengths</h2>
+            <ul class="strengths-list">
+                ${result.feedback_report.top_strengths.map(strength => `
+                    <li>✓ ${strength}</li>
+                `).join('')}
+            </ul>
+        </div>
+        
+        <div class="results-section">
+            <h2>Areas for Improvement</h2>
+            <ul class="improvements-list">
+                ${result.feedback_report.improvement_areas.map(area => `
+                    <li>→ ${area}</li>
+                `).join('')}
+            </ul>
+        </div>
+        
+        <div class="results-section">
+            <h2>Personalized Learning Path</h2>
+            <p class="improvement-plan">${result.feedback_report.improvement_plan}</p>
+            <p><strong>Estimated Time:</strong> ${result.feedback_report.estimated_improvement_time}</p>
+            
+            <h3>Recommended Resources</h3>
+            <div class="resources-grid">
+                ${result.feedback_report.learning_resources.map(resource => `
+                    <div class="resource-card">
+                        <h4>${resource.title}</h4>
+                        <p class="resource-type">${resource.type} • ${resource.duration || 'Self-paced'}</p>
+                        <a href="${resource.url}" target="_blank" class="btn btn-outline btn-small">View Resource</a>
+                    </div>
+                `).join('')}
+            </div>
+        </div>
+        
+        <div class="results-section encouragement">
+            <h2>Keep Going!</h2>
+            <p class="positive-message">${result.feedback_report.positive_message}</p>
+            
+            <h3>Next Steps</h3>
+            <ol class="next-steps">
+                ${result.feedback_report.next_steps.map(step => `<li>${step}</li>`).join('')}
+            </ol>
+        </div>
+        
+        <div class="results-actions">
+            <a href="/dashboard" class="btn btn-primary">Back to Dashboard</a>
+            <a href="/jobs" class="btn btn-outline">Browse More Jobs</a>
+        </div>
+    `;
+}
+
+loadResults();
+</script>
+{% endblock %}

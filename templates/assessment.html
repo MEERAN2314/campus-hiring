@@ -1,0 +1,198 @@
+{% extends "base.html" %}
+
+{% block title %}Assessment - Campus Hiring Platform{% endblock %}
+
+{% block content %}
+<section class="assessment-section">
+    <div class="container">
+        <div id="assessmentContent">
+            <div class="loading">Loading assessment...</div>
+        </div>
+    </div>
+</section>
+
+<script>
+const applicationId = "{{ application_id }}";
+let assessment = null;
+let currentQuestionIndex = 0;
+let answers = [];
+let startTime = Date.now();
+
+async function loadAssessment() {
+    const token = localStorage.getItem('token');
+    if (!token) {
+        window.location.href = '/login';
+        return;
+    }
+    
+    try {
+        // Get application
+        const appResponse = await fetch(`/api/applications/${applicationId}`, {
+            headers: { 'Authorization': `Bearer ${token}` }
+        });
+        
+        if (!appResponse.ok) {
+            throw new Error('Application not found');
+        }
+        
+        const application = await appResponse.json();
+        
+        // Get assessment
+        const assessmentResponse = await fetch(`/api/assessments/job/${application.job_id}`, {
+            headers: { 'Authorization': `Bearer ${token}` }
+        });
+        
+        if (!assessmentResponse.ok) {
+            throw new Error('Assessment not found');
+        }
+        
+        assessment = await assessmentResponse.json();
+        
+        // Start assessment
+        await fetch(`/api/submissions/start/${applicationId}`, {
+            method: 'POST',
+            headers: { 'Authorization': `Bearer ${token}` }
+        });
+        
+        // Initialize answers array
+        answers = assessment.questions.map(q => ({
+            question_id: q.question_id,
+            question_type: q.type,
+            time_spent_seconds: 0
+        }));
+        
+        displayQuestion();
+        
+    } catch (error) {
+        document.getElementById('assessmentContent').innerHTML = '<p>Error loading assessment</p>';
+    }
+}
+
+function displayQuestion() {
+    const question = assessment.questions[currentQuestionIndex];
+    const container = document.getElementById('assessmentContent');
+    
+    let questionHTML = `
+        <div class="assessment-header">
+            <h2>${assessment.title}</h2>
+            <div class="assessment-progress">
+                Question ${currentQuestionIndex + 1} of ${assessment.questions.length}
+            </div>
+        </div>
+        
+        <div class="question-card">
+            <div class="question-header">
+                <span class="question-type">${question.type}</span>
+                <span class="question-points">${question.points} points</span>
+            </div>
+            
+            <h3>${question.question_text}</h3>
+    `;
+    
+    if (question.type === 'mcq') {
+        questionHTML += `
+            <div class="mcq-options">
+                ${question.options.map(opt => `
+                    <label class="mcq-option">
+                        <input type="radio" name="answer" value="${opt.option_id}">
+                        <span>${opt.text}</span>
+                    </label>
+                `).join('')}
+            </div>
+        `;
+    } else if (question.type === 'coding') {
+        questionHTML += `
+            <div class="coding-editor">
+                <textarea id="codeEditor" placeholder="Write your code here...">${question.starter_code || ''}</textarea>
+            </div>
+        `;
+    } else {
+        questionHTML += `
+            <div class="text-answer">
+                <textarea id="textAnswer" placeholder="Write your answer here..." rows="8"></textarea>
+            </div>
+        `;
+    }
+    
+    questionHTML += `
+            <div class="question-actions">
+                ${currentQuestionIndex > 0 ? '<button onclick="previousQuestion()" class="btn btn-outline">Previous</button>' : ''}
+                ${currentQuestionIndex < assessment.questions.length - 1 ? 
+                    '<button onclick="nextQuestion()" class="btn btn-primary">Next</button>' :
+                    '<button onclick="submitAssessment()" class="btn btn-primary">Submit Assessment</button>'
+                }
+            </div>
+        </div>
+    `;
+    
+    container.innerHTML = questionHTML;
+}
+
+function saveCurrentAnswer() {
+    const question = assessment.questions[currentQuestionIndex];
+    const answer = answers[currentQuestionIndex];
+    
+    if (question.type === 'mcq') {
+        const selected = document.querySelector('input[name="answer"]:checked');
+        if (selected) {
+            answer.selected_option_id = selected.value;
+        }
+    } else if (question.type === 'coding') {
+        answer.code = document.getElementById('codeEditor').value;
+        answer.language = question.language || 'python';
+    } else {
+        answer.text_answer = document.getElementById('textAnswer').value;
+    }
+}
+
+function nextQuestion() {
+    saveCurrentAnswer();
+    currentQuestionIndex++;
+    displayQuestion();
+}
+
+function previousQuestion() {
+    saveCurrentAnswer();
+    currentQuestionIndex--;
+    displayQuestion();
+}
+
+async function submitAssessment() {
+    if (!confirm('Are you sure you want to submit? You cannot change answers after submission.')) {
+        return;
+    }
+    
+    saveCurrentAnswer();
+    
+    const token = localStorage.getItem('token');
+    const totalTime = Math.floor((Date.now() - startTime) / 1000);
+    
+    try {
+        const response = await fetch('/api/submissions', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${token}`
+            },
+            body: JSON.stringify({
+                application_id: applicationId,
+                assessment_id: assessment.id,
+                candidate_id: JSON.parse(localStorage.getItem('user')).id,
+                answers: answers
+            })
+        });
+        
+        if (response.ok) {
+            alert('Assessment submitted successfully! Results will be available shortly.');
+            window.location.href = '/dashboard';
+        } else {
+            alert('Failed to submit assessment');
+        }
+    } catch (error) {
+        alert('Error submitting assessment');
+    }
+}
+
+loadAssessment();
+</script>
+{% endblock %}
