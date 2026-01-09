@@ -498,6 +498,19 @@ async def seed_database():
     print("=" * 60)
     print("HireWave - Database Seeding")
     print("=" * 60)
+    print("\n⚠️  WARNING: This will DELETE ALL existing data!")
+    print("   - All users (recruiters and candidates)")
+    print("   - All jobs")
+    print("   - All assessments")
+    print("   - All applications")
+    print("   - All submissions")
+    print("   - All results")
+    
+    # Ask for confirmation
+    confirmation = input("\n❓ Are you sure you want to continue? (yes/no): ").strip().lower()
+    if confirmation not in ['yes', 'y']:
+        print("\n❌ Seeding cancelled.")
+        sys.exit(0)
     
     # Connect to MongoDB
     print("\n📡 Connecting to MongoDB...")
@@ -516,12 +529,15 @@ async def seed_database():
         print("   3. Database user has proper permissions")
         sys.exit(1)
     
-    # Clear existing data (optional - comment out if you want to keep existing data)
-    print("\n🗑️  Clearing existing sample data...")
+    # Clear ALL existing data
+    print("\n🗑️  Clearing ALL existing data...")
     try:
-        await db.users.delete_many({"_id": {"$regex": "^(recruiter_|candidate_)"}})
-        await db.jobs.delete_many({"_id": {"$regex": "^job_"}})
-        print("✓ Cleared existing sample data")
+        # Delete all collections
+        collections_to_clear = ['users', 'jobs', 'assessments', 'applications', 'submissions', 'results']
+        for collection in collections_to_clear:
+            result = await db[collection].delete_many({})
+            print(f"   ✓ Cleared {result.deleted_count} documents from {collection}")
+        print("✓ All existing data cleared")
     except Exception as e:
         print(f"⚠️  Warning: {e}")
     

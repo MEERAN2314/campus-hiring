@@ -19,10 +19,24 @@ if ! command -v python3 &> /dev/null; then
     exit 1
 fi
 
-# Run the seed script
-echo "🚀 Starting database seeding..."
+# Ask which mode
+echo "Choose seeding mode:"
+echo "1) Interactive (asks for confirmation)"
+echo "2) Force (clears all data immediately)"
 echo ""
-python3 seed_data.py
+read -p "Enter choice (1 or 2): " choice
+
+if [ "$choice" = "2" ]; then
+    echo ""
+    echo "🚀 Running FORCE seed (will clear ALL data)..."
+    echo ""
+    python3 seed_force.py
+else
+    echo ""
+    echo "🚀 Running interactive seed..."
+    echo ""
+    python3 seed_data.py
+fi
 
 # Check if seeding was successful
 if [ $? -eq 0 ]; then

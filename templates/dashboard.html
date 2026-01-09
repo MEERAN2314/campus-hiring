@@ -350,10 +350,20 @@
 </section>
 
 <script>
-// Set user name
+// Check user type and redirect if recruiter
 const user = JSON.parse(localStorage.getItem('user') || '{}');
-if (user.full_name) {
-    document.getElementById('userName').textContent = user.full_name.split(' ')[0];
+
+if (user.user_type === 'recruiter') {
+    // Redirect recruiters to their dashboard
+    window.location.href = '/recruiter/dashboard';
+} else {
+    // Set user name for candidates
+    if (user.full_name) {
+        document.getElementById('userName').textContent = user.full_name.split(' ')[0];
+    }
+    
+    // Load candidate dashboard
+    loadDashboard();
 }
 
 async function loadDashboard() {
@@ -456,7 +466,5 @@ function updateStats(applications) {
     document.getElementById('completedCount').textContent = applications.filter(a => a.status === 'assessment_completed' || a.status === 'under_review').length;
     document.getElementById('shortlistedCount').textContent = applications.filter(a => a.status === 'shortlisted').length;
 }
-
-loadDashboard();
 </script>
 {% endblock %}

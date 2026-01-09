@@ -87,8 +87,14 @@ async def register_page(request: Request):
 
 @app.get("/dashboard", response_class=HTMLResponse)
 async def dashboard(request: Request):
-    """Dashboard page"""
+    """Dashboard page - redirects based on user type"""
     return templates.TemplateResponse("dashboard.html", {"request": request})
+
+
+@app.get("/recruiter/dashboard", response_class=HTMLResponse)
+async def recruiter_dashboard(request: Request):
+    """Recruiter dashboard page"""
+    return templates.TemplateResponse("recruiter_dashboard.html", {"request": request})
 
 
 @app.get("/jobs", response_class=HTMLResponse)

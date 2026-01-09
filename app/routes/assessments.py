@@ -4,7 +4,7 @@ from app.utils.auth import get_current_recruiter, get_current_user
 from app.database import get_database
 from app.utils.helpers import generate_id
 from app.ai.gemini_service import gemini_service
-from datetime import datetime
+from datetime import datetime, timezone
 import logging
 
 logger = logging.getLogger(__name__)
@@ -50,6 +50,8 @@ async def create_assessment(
                 "description": job["description"]
             })
             
+            logger.info(f"AI generated {len(ai_result['questions'])} questions")
+            
             # Create assessment document
             assessment_dict = {
                 "_id": generate_id(),
@@ -69,11 +71,12 @@ async def create_assessment(
                 "is_ai_generated": True,
                 "generation_metadata": {
                     "model": "gemini-2.0-flash-exp",
-                    "generated_at": datetime.utcnow().isoformat(),
-                    "custom_instructions": assessment_data.custom_instructions
+                    "generated_at": datetime.now(timezone.utc).isoformat(),
+                    "custom_instructions": assessment_data.custom_instructions,
+                    "num_questions": len(ai_result["questions"])
                 },
-                "created_at": datetime.utcnow(),
-                "updated_at": datetime.utcnow()
+                "created_at": datetime.now(timezone.utc),
+                "updated_at": datetime.now(timezone.utc)
             }
             
         except Exception as e:
@@ -95,8 +98,10 @@ async def create_assessment(
     # Update job with assessment_id
     await db.jobs.update_one(
         {"_id": assessment_data.job_id},
-        {"$set": {"assessment_id": assessment_dict["_id"], "updated_at": datetime.utcnow()}}
+        {"$set": {"assessment_id": assessment_dict["_id"], "updated_at": datetime.now(timezone.utc)}}
     )
+    
+    logger.info(f"Successfully created assessment {assessment_dict['_id']} with {len(assessment_dict['questions'])} questions")
     
     return Assessment(**assessment_dict)
 

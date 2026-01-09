@@ -1,10 +1,14 @@
-from fastapi import APIRouter, HTTPException, status, Depends
+from fastapi import APIRouter, HTTPException, status, Depends, BackgroundTasks
 from typing import List
 from app.models.application import ApplicationCreate, Application, ApplicationStatus
 from app.utils.auth import get_current_candidate, get_current_recruiter, get_current_user
 from app.database import get_database
 from app.utils.helpers import generate_id
-from datetime import datetime
+from app.utils.email import email_service
+from datetime import datetime, timezone
+import logging
+
+logger = logging.getLogger(__name__)
 
 router = APIRouter(prefix="/applications", tags=["Applications"])
 
@@ -12,6 +16,7 @@ router = APIRouter(prefix="/applications", tags=["Applications"])
 @router.post("", response_model=Application, status_code=status.HTTP_201_CREATED)
 async def apply_to_job(
     application_data: ApplicationCreate,
+    background_tasks: BackgroundTasks,
     current_user=Depends(get_current_candidate)
 ):
     """Apply to a job"""
@@ -48,8 +53,8 @@ async def apply_to_job(
         "candidate_college": user.get("college_name"),
         "status": ApplicationStatus.APPLIED.value,
         "resume_url": user.get("resume_url"),
-        "applied_at": datetime.utcnow(),
-        "updated_at": datetime.utcnow()
+        "applied_at": datetime.now(timezone.utc),
+        "updated_at": datetime.now(timezone.utc)
     }
     
     await db.applications.insert_one(application_dict)
@@ -59,6 +64,34 @@ async def apply_to_job(
         {"_id": application_data.job_id},
         {"$inc": {"applications_count": 1}}
     )
+    
+    # Send email notifications in background
+    try:
+        # Email to candidate
+        background_tasks.add_task(
+            email_service.send_application_confirmation,
+            user["email"],
+            user["full_name"],
+            job["title"],
+            job["company_name"]
+        )
+        
+        # Email to recruiter
+        recruiter = await db.users.find_one({"_id": job["company_id"]})
+        if recruiter:
+            background_tasks.add_task(
+                email_service.send_new_application_notification,
+                recruiter["email"],
+                recruiter["full_name"],
+                user["full_name"],
+                job["title"],
+                user.get("skills", [])
+            )
+        
+        logger.info(f"Email notifications queued for application {application_dict['_id']}")
+    except Exception as e:
+        logger.error(f"Error queuing email notifications: {e}")
+        # Don't fail the application if email fails
     
     return Application(**application_dict)
 
@@ -130,6 +163,7 @@ async def get_application(application_id: str, current_user=Depends(get_current_
 @router.post("/{application_id}/shortlist", response_model=Application)
 async def shortlist_application(
     application_id: str,
+    background_tasks: BackgroundTasks,
     current_user=Depends(get_current_recruiter)
 ):
     """Shortlist an application"""
@@ -148,7 +182,7 @@ async def shortlist_application(
     # Update application status
     await db.applications.update_one(
         {"_id": application_id},
-        {"$set": {"status": ApplicationStatus.SHORTLISTED.value, "updated_at": datetime.utcnow()}}
+        {"$set": {"status": ApplicationStatus.SHORTLISTED.value, "updated_at": datetime.now(timezone.utc)}}
     )
     
     # Update result
@@ -157,6 +191,19 @@ async def shortlist_application(
         {"$set": {"is_shortlisted": True}}
     )
     
+    # Send shortlist notification email
+    try:
+        background_tasks.add_task(
+            email_service.send_shortlist_notification,
+            application["candidate_email"],
+            application["candidate_name"],
+            job["title"],
+            job["company_name"]
+        )
+        logger.info(f"Shortlist notification queued for {application['candidate_email']}")
+    except Exception as e:
+        logger.error(f"Error queuing shortlist email: {e}")
+    
     updated_application = await db.applications.find_one({"_id": application_id})
     return Application(**updated_application)
 
@@ -164,6 +211,7 @@ async def shortlist_application(
 @router.post("/{application_id}/reject", response_model=Application)
 async def reject_application(
     application_id: str,
+    background_tasks: BackgroundTasks,
     current_user=Depends(get_current_recruiter)
 ):
     """Reject an application"""
@@ -182,8 +230,11 @@ async def reject_application(
     # Update application status
     await db.applications.update_one(
         {"_id": application_id},
-        {"$set": {"status": ApplicationStatus.REJECTED.value, "updated_at": datetime.utcnow()}}
+        {"$set": {"status": ApplicationStatus.REJECTED.value, "updated_at": datetime.now(timezone.utc)}}
     )
+    
+    # Note: You can add rejection email here if needed
+    # background_tasks.add_task(email_service.send_rejection_email, ...)
     
     updated_application = await db.applications.find_one({"_id": application_id})
     return Application(**updated_application)
