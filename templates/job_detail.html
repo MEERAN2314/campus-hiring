@@ -2,6 +2,262 @@
 
 {% block title %}Job Details - Campus Hiring Platform{% endblock %}
 
+{% block extra_css %}
+<style>
+.job-detail-section {
+    padding: 3rem 0;
+    min-height: calc(100vh - 200px);
+}
+
+.job-detail-content {
+    max-width: 900px;
+    margin: 0 auto;
+}
+
+.job-detail-hero {
+    background: linear-gradient(135deg, var(--primary-blue), var(--dark-blue));
+    color: var(--white);
+    padding: 3rem;
+    border-radius: 20px;
+    margin-bottom: 2rem;
+    box-shadow: var(--shadow-xl);
+    position: relative;
+    overflow: hidden;
+}
+
+.job-detail-hero::before {
+    content: '';
+    position: absolute;
+    top: -50%;
+    right: -50%;
+    width: 100%;
+    height: 100%;
+    background: radial-gradient(circle, rgba(255, 255, 255, 0.1) 0%, transparent 70%);
+    animation: rotate 20s linear infinite;
+}
+
+.job-detail-hero-content {
+    position: relative;
+    z-index: 1;
+}
+
+.job-detail-title {
+    display: flex;
+    justify-content: space-between;
+    align-items: start;
+    margin-bottom: 1.5rem;
+    flex-wrap: wrap;
+    gap: 1rem;
+}
+
+.job-detail-title h1 {
+    font-size: 2.5rem;
+    font-weight: 800;
+    margin: 0;
+}
+
+.job-type-badge-large {
+    background: rgba(255, 255, 255, 0.2);
+    backdrop-filter: blur(10px);
+    color: var(--white);
+    padding: 0.5rem 1.5rem;
+    border-radius: 25px;
+    font-size: 0.9rem;
+    font-weight: 600;
+    border: 2px solid rgba(255, 255, 255, 0.3);
+}
+
+.job-company-info {
+    font-size: 1.3rem;
+    opacity: 0.95;
+    margin-bottom: 0.5rem;
+    font-weight: 600;
+}
+
+.job-location-info {
+    font-size: 1.1rem;
+    opacity: 0.9;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.job-meta-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 1.5rem;
+    margin-bottom: 2rem;
+}
+
+.job-meta-card {
+    background: var(--white);
+    padding: 1.5rem;
+    border-radius: 16px;
+    box-shadow: var(--shadow);
+    border: 2px solid #e2e8f0;
+    transition: var(--transition);
+}
+
+.job-meta-card:hover {
+    transform: translateY(-5px);
+    box-shadow: var(--shadow-lg);
+    border-color: var(--primary-blue);
+}
+
+.job-meta-label {
+    color: var(--gray);
+    font-size: 0.85rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    margin-bottom: 0.5rem;
+}
+
+.job-meta-value {
+    color: var(--dark-blue);
+    font-size: 1.2rem;
+    font-weight: 700;
+}
+
+.job-content-card {
+    background: var(--white);
+    padding: 2rem;
+    border-radius: 16px;
+    box-shadow: var(--shadow);
+    margin-bottom: 2rem;
+    border: 2px solid #e2e8f0;
+    animation: fadeIn 0.6s ease;
+}
+
+.job-content-card h2 {
+    color: var(--dark-blue);
+    font-size: 1.8rem;
+    margin-bottom: 1rem;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.job-content-card h2::before {
+    content: '';
+    width: 4px;
+    height: 30px;
+    background: linear-gradient(180deg, var(--primary-blue), var(--accent-blue));
+    border-radius: 2px;
+}
+
+.job-description {
+    color: var(--dark-gray);
+    line-height: 1.8;
+    font-size: 1.05rem;
+}
+
+.skills-grid {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.75rem;
+}
+
+.skill-tag-large {
+    background: linear-gradient(135deg, var(--light-blue), #bfdbfe);
+    color: var(--primary-blue);
+    padding: 0.75rem 1.25rem;
+    border-radius: 12px;
+    font-size: 0.95rem;
+    font-weight: 600;
+    transition: var(--transition);
+    border: 2px solid transparent;
+}
+
+.skill-tag-large:hover {
+    transform: translateY(-3px);
+    border-color: var(--primary-blue);
+    box-shadow: var(--shadow);
+}
+
+.colleges-list {
+    list-style: none;
+    padding: 0;
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+    gap: 1rem;
+}
+
+.colleges-list li {
+    background: var(--light-gray);
+    padding: 1rem;
+    border-radius: 10px;
+    color: var(--dark-blue);
+    font-weight: 500;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    transition: var(--transition);
+}
+
+.colleges-list li::before {
+    content: '🎓';
+    font-size: 1.2rem;
+}
+
+.colleges-list li:hover {
+    background: var(--light-blue);
+    transform: translateX(5px);
+}
+
+.job-actions-sticky {
+    position: sticky;
+    bottom: 0;
+    background: rgba(255, 255, 255, 0.95);
+    backdrop-filter: blur(10px);
+    padding: 1.5rem 0;
+    border-top: 2px solid #e2e8f0;
+    box-shadow: 0 -4px 6px rgba(0, 0, 0, 0.05);
+    margin-top: 2rem;
+}
+
+.job-actions-content {
+    max-width: 900px;
+    margin: 0 auto;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 1rem;
+    flex-wrap: wrap;
+}
+
+.job-actions-info {
+    color: var(--gray);
+    font-size: 0.95rem;
+}
+
+.job-actions-buttons {
+    display: flex;
+    gap: 1rem;
+}
+
+@media (max-width: 768px) {
+    .job-detail-title h1 {
+        font-size: 1.8rem;
+    }
+    
+    .job-meta-grid {
+        grid-template-columns: repeat(2, 1fr);
+    }
+    
+    .job-actions-content {
+        flex-direction: column;
+        text-align: center;
+    }
+    
+    .job-actions-buttons {
+        width: 100%;
+        flex-direction: column;
+    }
+}
+</style>
+{% endblock %}
+
 {% block content %}
 <section class="job-detail-section">
     <div class="container">
@@ -22,10 +278,10 @@ async function loadJobDetail() {
             const job = await response.json();
             displayJobDetail(job);
         } else {
-            document.getElementById('jobDetail').innerHTML = '<p>Job not found</p>';
+            document.getElementById('jobDetail').innerHTML = '<div class="empty-state">Job not found</div>';
         }
     } catch (error) {
-        document.getElementById('jobDetail').innerHTML = '<p>Error loading job</p>';
+        document.getElementById('jobDetail').innerHTML = '<div class="empty-state">Error loading job</div>';
     }
 }
 
@@ -33,42 +289,71 @@ function displayJobDetail(job) {
     const container = document.getElementById('jobDetail');
     
     container.innerHTML = `
-        <div class="job-detail-header">
-            <h1>${job.title}</h1>
-            <span class="job-type-badge">${job.job_type}</span>
-        </div>
-        
-        <div class="job-detail-meta">
-            <p><strong>Company:</strong> ${job.company_name}</p>
-            <p><strong>Location:</strong> ${job.location}</p>
-            <p><strong>Experience:</strong> ${job.experience_level}</p>
-            ${job.salary_range ? `<p><strong>Salary:</strong> ${job.salary_range}</p>` : ''}
-            <p><strong>Vacancies:</strong> ${job.vacancies}</p>
-        </div>
-        
-        <div class="job-detail-section">
-            <h2>Description</h2>
-            <p>${job.description}</p>
-        </div>
-        
-        <div class="job-detail-section">
-            <h2>Required Skills</h2>
-            <div class="skills-list">
-                ${job.required_skills.map(skill => `<span class="skill-tag">${skill}</span>`).join('')}
+        <div class="job-detail-hero">
+            <div class="job-detail-hero-content">
+                <div class="job-detail-title">
+                    <h1>${job.title}</h1>
+                    <span class="job-type-badge-large">${job.job_type}</span>
+                </div>
+                <div class="job-company-info">📍 ${job.company_name}</div>
+                <div class="job-location-info">🌍 ${job.location}</div>
             </div>
         </div>
         
-        ${job.target_colleges.length > 0 ? `
-            <div class="job-detail-section">
-                <h2>Target Colleges</h2>
-                <ul>
+        <div class="job-meta-grid">
+            <div class="job-meta-card">
+                <div class="job-meta-label">Experience Level</div>
+                <div class="job-meta-value">${job.experience_level}</div>
+            </div>
+            ${job.salary_range ? `
+                <div class="job-meta-card">
+                    <div class="job-meta-label">Salary Range</div>
+                    <div class="job-meta-value">${job.salary_range}</div>
+                </div>
+            ` : ''}
+            <div class="job-meta-card">
+                <div class="job-meta-label">Vacancies</div>
+                <div class="job-meta-value">${job.vacancies} ${job.vacancies === 1 ? 'Position' : 'Positions'}</div>
+            </div>
+            <div class="job-meta-card">
+                <div class="job-meta-label">Posted On</div>
+                <div class="job-meta-value">${new Date(job.created_at).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}</div>
+            </div>
+        </div>
+        
+        <div class="job-content-card">
+            <h2>📋 Job Description</h2>
+            <p class="job-description">${job.description}</p>
+        </div>
+        
+        <div class="job-content-card">
+            <h2>💼 Required Skills</h2>
+            <div class="skills-grid">
+                ${job.required_skills.map(skill => `<span class="skill-tag-large">${skill}</span>`).join('')}
+            </div>
+        </div>
+        
+        ${job.target_colleges && job.target_colleges.length > 0 ? `
+            <div class="job-content-card">
+                <h2>🎓 Target Colleges</h2>
+                <ul class="colleges-list">
                     ${job.target_colleges.map(college => `<li>${college}</li>`).join('')}
                 </ul>
             </div>
         ` : ''}
         
-        <div class="job-detail-actions">
-            <button onclick="applyToJob()" class="btn btn-primary btn-large" id="applyBtn">Apply Now</button>
+        <div class="job-actions-sticky">
+            <div class="container">
+                <div class="job-actions-content">
+                    <div class="job-actions-info">
+                        Ready to take the next step in your career?
+                    </div>
+                    <div class="job-actions-buttons">
+                        <button onclick="window.history.back()" class="btn btn-outline">← Back to Jobs</button>
+                        <button onclick="applyToJob()" class="btn btn-primary btn-large" id="applyBtn">Apply Now →</button>
+                    </div>
+                </div>
+            </div>
         </div>
     `;
 }
