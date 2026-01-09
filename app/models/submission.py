@@ -27,6 +27,8 @@ class SubmissionBase(BaseModel):
     assessment_id: str
     candidate_id: str
     answers: List[Answer]
+    warning_count: Optional[int] = 0  # Number of tab-switch warnings
+    disqualified: Optional[bool] = False  # Whether candidate was disqualified
 
 
 class SubmissionCreate(SubmissionBase):
