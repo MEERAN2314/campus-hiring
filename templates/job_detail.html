@@ -2,6 +2,397 @@
 
 {% block title %}Job Details - Campus Hiring Platform{% endblock %}
 
+{% block extra_css %}
+<style>
+.job-detail-section {
+    padding: 3rem 0;
+    min-height: calc(100vh - 200px);
+    position: relative;
+}
+
+.job-detail-content {
+    max-width: 1000px;
+    margin: 0 auto;
+}
+
+.job-detail-hero {
+    background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 50%, #a855f7 100%);
+    color: var(--white);
+    padding: 3rem;
+    border-radius: 24px;
+    margin-bottom: 2rem;
+    box-shadow: 0 20px 60px rgba(99, 102, 241, 0.3);
+    position: relative;
+    overflow: hidden;
+    animation: fadeInUp 0.6s ease;
+}
+
+.job-detail-hero::before {
+    content: '';
+    position: absolute;
+    top: -50%;
+    right: -50%;
+    width: 100%;
+    height: 100%;
+    background: radial-gradient(circle, rgba(255, 255, 255, 0.15) 0%, transparent 70%);
+    animation: rotate 20s linear infinite;
+}
+
+.job-detail-hero::after {
+    content: '';
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    height: 100%;
+    background: linear-gradient(180deg, transparent 0%, rgba(0, 0, 0, 0.1) 100%);
+}
+
+.job-detail-hero-content {
+    position: relative;
+    z-index: 1;
+}
+
+.job-detail-title {
+    display: flex;
+    justify-content: space-between;
+    align-items: start;
+    margin-bottom: 1.5rem;
+    flex-wrap: wrap;
+    gap: 1rem;
+}
+
+.job-detail-title h1 {
+    font-size: 2.8rem;
+    font-weight: 800;
+    margin: 0;
+    text-shadow: 0 2px 20px rgba(0, 0, 0, 0.2);
+    animation: slideInLeft 0.6s ease;
+}
+
+.job-type-badge-large {
+    background: rgba(255, 255, 255, 0.25);
+    backdrop-filter: blur(10px);
+    color: var(--white);
+    padding: 0.6rem 1.75rem;
+    border-radius: 30px;
+    font-size: 0.95rem;
+    font-weight: 700;
+    border: 2px solid rgba(255, 255, 255, 0.4);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    animation: slideInRight 0.6s ease;
+}
+
+.job-company-info {
+    font-size: 1.4rem;
+    opacity: 0.95;
+    margin-bottom: 0.75rem;
+    font-weight: 600;
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    animation: fadeIn 0.8s ease 0.2s both;
+}
+
+.job-company-info i {
+    width: 24px;
+    height: 24px;
+}
+
+.job-location-info {
+    font-size: 1.15rem;
+    opacity: 0.9;
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    animation: fadeIn 0.8s ease 0.3s both;
+}
+
+.job-location-info i {
+    width: 20px;
+    height: 20px;
+}
+
+.job-meta-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+    gap: 1.5rem;
+    margin-bottom: 2rem;
+}
+
+.job-meta-card {
+    background: var(--white);
+    padding: 1.75rem;
+    border-radius: 20px;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+    border: 2px solid #f1f5f9;
+    transition: var(--transition);
+    position: relative;
+    overflow: hidden;
+    animation: fadeInUp 0.6s ease;
+}
+
+.job-meta-card::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 4px;
+    background: linear-gradient(90deg, #6366f1, #8b5cf6, #a855f7);
+    transform: scaleX(0);
+    transition: transform 0.3s ease;
+}
+
+.job-meta-card:hover::before {
+    transform: scaleX(1);
+}
+
+.job-meta-card:hover {
+    transform: translateY(-8px);
+    box-shadow: 0 12px 40px rgba(99, 102, 241, 0.2);
+    border-color: #e0e7ff;
+}
+
+.job-meta-card:nth-child(1) { animation-delay: 0.1s; }
+.job-meta-card:nth-child(2) { animation-delay: 0.2s; }
+.job-meta-card:nth-child(3) { animation-delay: 0.3s; }
+.job-meta-card:nth-child(4) { animation-delay: 0.4s; }
+
+.job-meta-label {
+    color: var(--gray);
+    font-size: 0.8rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    margin-bottom: 0.75rem;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.job-meta-value {
+    color: var(--dark-blue);
+    font-size: 1.35rem;
+    font-weight: 800;
+}
+
+.job-content-card {
+    background: var(--white);
+    padding: 2.5rem;
+    border-radius: 20px;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+    margin-bottom: 2rem;
+    border: 2px solid #f1f5f9;
+    animation: fadeInUp 0.6s ease;
+    position: relative;
+    overflow: hidden;
+}
+
+.job-content-card::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 6px;
+    height: 100%;
+    background: linear-gradient(180deg, #6366f1, #8b5cf6, #a855f7);
+}
+
+.job-content-card h2 {
+    color: var(--dark-blue);
+    font-size: 1.9rem;
+    margin-bottom: 1.5rem;
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    font-weight: 800;
+}
+
+.job-content-card h2 i {
+    color: #6366f1;
+}
+
+.job-description {
+    color: var(--dark-gray);
+    line-height: 1.9;
+    font-size: 1.05rem;
+}
+
+.skills-grid {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 1rem;
+}
+
+.skill-tag-large {
+    background: linear-gradient(135deg, #eef2ff, #e0e7ff);
+    color: #6366f1;
+    padding: 0.85rem 1.5rem;
+    border-radius: 14px;
+    font-size: 0.95rem;
+    font-weight: 700;
+    transition: var(--transition);
+    border: 2px solid transparent;
+    position: relative;
+    overflow: hidden;
+}
+
+.skill-tag-large::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.5), transparent);
+    transition: left 0.5s ease;
+}
+
+.skill-tag-large:hover::before {
+    left: 100%;
+}
+
+.skill-tag-large:hover {
+    transform: translateY(-4px);
+    border-color: #6366f1;
+    box-shadow: 0 8px 20px rgba(99, 102, 241, 0.3);
+}
+
+.colleges-list {
+    list-style: none;
+    padding: 0;
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    gap: 1rem;
+}
+
+.colleges-list li {
+    background: linear-gradient(135deg, #f8fafc, #f1f5f9);
+    padding: 1.25rem;
+    border-radius: 14px;
+    color: var(--dark-blue);
+    font-weight: 600;
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    transition: var(--transition);
+    border: 2px solid transparent;
+}
+
+.colleges-list li::before {
+    content: '';
+    width: 8px;
+    height: 8px;
+    background: linear-gradient(135deg, #6366f1, #8b5cf6);
+    border-radius: 50%;
+    flex-shrink: 0;
+}
+
+.colleges-list li:hover {
+    background: linear-gradient(135deg, #eef2ff, #e0e7ff);
+    transform: translateX(8px);
+    border-color: #c7d2fe;
+}
+
+.job-actions-sticky {
+    position: sticky;
+    bottom: 0;
+    background: rgba(255, 255, 255, 0.98);
+    backdrop-filter: blur(20px);
+    padding: 1.75rem 0;
+    border-top: 2px solid #f1f5f9;
+    box-shadow: 0 -8px 30px rgba(0, 0, 0, 0.08);
+    margin-top: 3rem;
+    z-index: 100;
+}
+
+.job-actions-content {
+    max-width: 1000px;
+    margin: 0 auto;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 1.5rem;
+    flex-wrap: wrap;
+}
+
+.job-actions-info {
+    color: var(--gray);
+    font-size: 1rem;
+    font-weight: 500;
+}
+
+.job-actions-buttons {
+    display: flex;
+    gap: 1rem;
+}
+
+.job-actions-buttons .btn {
+    padding: 1rem 2rem;
+    font-size: 1.05rem;
+    font-weight: 700;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+@keyframes slideInLeft {
+    from {
+        opacity: 0;
+        transform: translateX(-30px);
+    }
+    to {
+        opacity: 1;
+        transform: translateX(0);
+    }
+}
+
+@keyframes slideInRight {
+    from {
+        opacity: 0;
+        transform: translateX(30px);
+    }
+    to {
+        opacity: 1;
+        transform: translateX(0);
+    }
+}
+
+@keyframes fadeInUp {
+    from {
+        opacity: 0;
+        transform: translateY(30px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+@media (max-width: 768px) {
+    .job-detail-title h1 {
+        font-size: 2rem;
+    }
+    
+    .job-meta-grid {
+        grid-template-columns: repeat(2, 1fr);
+    }
+    
+    .job-actions-content {
+        flex-direction: column;
+        text-align: center;
+    }
+    
+    .job-actions-buttons {
+        width: 100%;
+        flex-direction: column;
+    }
+}
+</style>
+{% endblock %}
+
 {% block content %}
 <section class="job-detail-section">
     <div class="container">
@@ -22,10 +413,10 @@ async function loadJobDetail() {
             const job = await response.json();
             displayJobDetail(job);
         } else {
-            document.getElementById('jobDetail').innerHTML = '<p>Job not found</p>';
+            document.getElementById('jobDetail').innerHTML = '<div class="empty-state">Job not found</div>';
         }
     } catch (error) {
-        document.getElementById('jobDetail').innerHTML = '<p>Error loading job</p>';
+        document.getElementById('jobDetail').innerHTML = '<div class="empty-state">Error loading job</div>';
     }
 }
 
@@ -33,42 +424,75 @@ function displayJobDetail(job) {
     const container = document.getElementById('jobDetail');
     
     container.innerHTML = `
-        <div class="job-detail-header">
-            <h1>${job.title}</h1>
-            <span class="job-type-badge">${job.job_type}</span>
-        </div>
-        
-        <div class="job-detail-meta">
-            <p><strong>Company:</strong> ${job.company_name}</p>
-            <p><strong>Location:</strong> ${job.location}</p>
-            <p><strong>Experience:</strong> ${job.experience_level}</p>
-            ${job.salary_range ? `<p><strong>Salary:</strong> ${job.salary_range}</p>` : ''}
-            <p><strong>Vacancies:</strong> ${job.vacancies}</p>
-        </div>
-        
-        <div class="job-detail-section">
-            <h2>Description</h2>
-            <p>${job.description}</p>
-        </div>
-        
-        <div class="job-detail-section">
-            <h2>Required Skills</h2>
-            <div class="skills-list">
-                ${job.required_skills.map(skill => `<span class="skill-tag">${skill}</span>`).join('')}
+        <div class="job-detail-hero">
+            <div class="job-detail-hero-content">
+                <div class="job-detail-title">
+                    <h1>${job.title}</h1>
+                    <span class="job-type-badge-large">${job.job_type}</span>
+                </div>
+                <div class="job-company-info"><i data-lucide="building-2" class="icon icon-md"></i> ${job.company_name}</div>
+                <div class="job-location-info"><i data-lucide="map-pin" class="icon icon-md"></i> ${job.location}</div>
             </div>
         </div>
         
-        ${job.target_colleges.length > 0 ? `
-            <div class="job-detail-section">
-                <h2>Target Colleges</h2>
-                <ul>
+        <div class="job-meta-grid">
+            <div class="job-meta-card">
+                <div class="job-meta-label">Experience Level</div>
+                <div class="job-meta-value">${job.experience_level}</div>
+            </div>
+            ${job.salary_range ? `
+                <div class="job-meta-card">
+                    <div class="job-meta-label">Salary Range</div>
+                    <div class="job-meta-value">${job.salary_range}</div>
+                </div>
+            ` : ''}
+            <div class="job-meta-card">
+                <div class="job-meta-label">Vacancies</div>
+                <div class="job-meta-value">${job.vacancies} ${job.vacancies === 1 ? 'Position' : 'Positions'}</div>
+            </div>
+            <div class="job-meta-card">
+                <div class="job-meta-label">Posted On</div>
+                <div class="job-meta-value">${new Date(job.created_at).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}</div>
+            </div>
+        </div>
+        
+        <div class="job-content-card">
+            <h2><i data-lucide="file-text" class="section-icon"></i> Job Description</h2>
+            <p class="job-description">${job.description}</p>
+        </div>
+        
+        <div class="job-content-card">
+            <h2><i data-lucide="code-2" class="section-icon"></i> Required Skills</h2>
+            <div class="skills-grid">
+                ${job.required_skills.map(skill => `<span class="skill-tag-large">${skill}</span>`).join('')}
+            </div>
+        </div>
+        
+        ${job.target_colleges && job.target_colleges.length > 0 ? `
+            <div class="job-content-card">
+                <h2><i data-lucide="graduation-cap" class="section-icon"></i> Target Colleges</h2>
+                <ul class="colleges-list">
                     ${job.target_colleges.map(college => `<li>${college}</li>`).join('')}
                 </ul>
             </div>
         ` : ''}
         
-        <div class="job-detail-actions">
-            <button onclick="applyToJob()" class="btn btn-primary btn-large" id="applyBtn">Apply Now</button>
+        <div class="job-actions-sticky">
+            <div class="container">
+                <div class="job-actions-content">
+                    <div class="job-actions-info">
+                        Ready to take the next step in your career?
+                    </div>
+                    <div class="job-actions-buttons">
+                        <button onclick="window.history.back()" class="btn btn-outline">
+                            <i data-lucide="arrow-left" class="icon icon-sm"></i> Back to Jobs
+                        </button>
+                        <button onclick="applyToJob()" class="btn btn-primary btn-large" id="applyBtn">
+                            Apply Now <i data-lucide="send" class="icon icon-sm"></i>
+                        </button>
+                    </div>
+                </div>
+            </div>
         </div>
     `;
 }

@@ -2,51 +2,126 @@
 
 {% block title %}Home - Campus Hiring Platform{% endblock %}
 
+{% block extra_css %}
+<style>
+.hero {
+    position: relative;
+}
+
+.hero .particles-bg {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    overflow: hidden;
+}
+
+.features {
+    position: relative;
+}
+
+.features .grid-bg {
+    opacity: 0.5;
+}
+
+.feature-card {
+    position: relative;
+}
+
+.feature-card .shimmer {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    pointer-events: none;
+}
+
+.cta {
+    position: relative;
+}
+
+.cta .wave-bg {
+    opacity: 0.3;
+}
+</style>
+{% endblock %}
+
 {% block content %}
 <section class="hero">
+    <!-- Floating Particles -->
+    <div class="particles-bg">
+        <div class="particle"></div>
+        <div class="particle"></div>
+        <div class="particle"></div>
+        <div class="particle"></div>
+        <div class="particle"></div>
+    </div>
+    
     <div class="container">
         <div class="hero-content">
             <h1 class="hero-title">AI-Powered Campus Hiring</h1>
             <p class="hero-subtitle">Fair, skill-based recruitment with intelligent assessments and personalized feedback</p>
             <div class="hero-buttons">
-                <a href="/register" class="btn btn-primary btn-large">Get Started</a>
-                <a href="/jobs" class="btn btn-outline btn-large">Browse Jobs</a>
+                <a href="/register" class="btn btn-primary btn-large magnetic">Get Started</a>
+                <a href="/jobs" class="btn btn-outline btn-large magnetic">Browse Jobs</a>
             </div>
         </div>
     </div>
 </section>
 
-<section class="features">
-    <div class="container">
+<section class="features animated-bg">
+    <div class="grid-bg"></div>
+    <div class="container" style="position: relative; z-index: 1;">
         <h2 class="section-title">Why Choose Us?</h2>
+        <p class="section-subtitle">Experience the future of campus recruitment</p>
         <div class="features-grid">
-            <div class="feature-card">
-                <div class="feature-icon">🤖</div>
+            <div class="feature-card stagger-item tilt-card">
+                <div class="shimmer"></div>
+                <div class="feature-icon-container">
+                    <i data-lucide="brain-circuit"></i>
+                </div>
                 <h3>AI-Powered Assessments</h3>
                 <p>Intelligent question generation tailored to each role and skill level</p>
             </div>
-            <div class="feature-card">
-                <div class="feature-icon">📊</div>
+            <div class="feature-card stagger-item tilt-card">
+                <div class="shimmer"></div>
+                <div class="feature-icon-container">
+                    <i data-lucide="code-2"></i>
+                </div>
                 <h3>Deep Code Analysis</h3>
                 <p>Evaluate correctness, efficiency, readability, and problem-solving approach</p>
             </div>
-            <div class="feature-card">
-                <div class="feature-icon">💡</div>
+            <div class="feature-card stagger-item tilt-card">
+                <div class="shimmer"></div>
+                <div class="feature-icon-container">
+                    <i data-lucide="lightbulb"></i>
+                </div>
                 <h3>Personalized Feedback</h3>
                 <p>Every candidate gets detailed improvement plans and learning resources</p>
             </div>
-            <div class="feature-card">
-                <div class="feature-icon">⚖️</div>
+            <div class="feature-card stagger-item tilt-card">
+                <div class="shimmer"></div>
+                <div class="feature-icon-container">
+                    <i data-lucide="scale"></i>
+                </div>
                 <h3>Bias-Free Hiring</h3>
                 <p>AI actively detects and prevents bias for fair evaluation</p>
             </div>
-            <div class="feature-card">
-                <div class="feature-icon">⚡</div>
+            <div class="feature-card stagger-item tilt-card">
+                <div class="shimmer"></div>
+                <div class="feature-icon-container">
+                    <i data-lucide="activity"></i>
+                </div>
                 <h3>Real-Time Insights</h3>
                 <p>Live monitoring and instant analytics for recruiters</p>
             </div>
-            <div class="feature-card">
-                <div class="feature-icon">🎯</div>
+            <div class="feature-card stagger-item tilt-card">
+                <div class="shimmer"></div>
+                <div class="feature-icon-container">
+                    <i data-lucide="target"></i>
+                </div>
                 <h3>Skill-Based Ranking</h3>
                 <p>Find the right candidates, not just toppers</p>
             </div>
@@ -55,10 +130,15 @@
 </section>
 
 <section class="cta">
-    <div class="container">
+    <div class="wave-bg">
+        <div class="wave"></div>
+        <div class="wave"></div>
+        <div class="wave"></div>
+    </div>
+    <div class="container" style="position: relative; z-index: 1;">
         <h2>Ready to Transform Your Campus Hiring?</h2>
         <p>Join hundreds of companies and thousands of students</p>
-        <a href="/register" class="btn btn-primary btn-large">Start Free Trial</a>
+        <a href="/register" class="btn btn-primary btn-large pulse magnetic">Start Free Trial</a>
     </div>
 </section>
 {% endblock %}

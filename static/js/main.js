@@ -3,7 +3,21 @@
 // Check authentication on page load
 document.addEventListener('DOMContentLoaded', () => {
     checkAuth();
+    initScrollEffects();
 });
+
+// Initialize scroll effects
+function initScrollEffects() {
+    const navbar = document.querySelector('.navbar');
+    
+    window.addEventListener('scroll', () => {
+        if (window.scrollY > 50) {
+            navbar.classList.add('scrolled');
+        } else {
+            navbar.classList.remove('scrolled');
+        }
+    });
+}
 
 // Check if user is authenticated
 function checkAuth() {
