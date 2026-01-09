@@ -1,12 +1,12 @@
-# Campus Hiring Platform - Project Structure
+# HireWave - Project Structure
 
 ## Overview
-AI-powered campus recruitment platform with intelligent assessments, real-time evaluation, and personalized candidate feedback.
+AI-powered recruitment platform with intelligent assessments, real-time evaluation, and personalized candidate feedback.
 
 ## Directory Structure
 
 ```
-campus-hiring/
+hirewave/
 ├── app/                          # Main application code
 │   ├── __init__.py
 │   ├── main.py                   # FastAPI application entry point
@@ -341,4 +341,4 @@ For issues, questions, or contributions:
 
 ---
 
-Built with ❤️ for fair and intelligent campus hiring
+Built with ❤️ for fair and intelligent hiring

@@ -1,8 +1,8 @@
 #!/bin/bash
 
-# Campus Hiring Platform - Run Script
+# HireWave - Run Script
 
-echo "Starting Campus Hiring Platform..."
+echo "Starting HireWave..."
 
 # Check if .env exists
 if [ ! -f .env ]; then

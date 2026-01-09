@@ -1,8 +1,8 @@
-# Campus Hiring Platform - Project Summary
+# HireWave - Project Summary
 
 ## 🎯 Project Overview
 
-A complete, production-ready AI-powered campus recruitment platform built for a hackathon. The platform automates end-to-end hiring with intelligent assessments, real-time evaluation, and personalized candidate feedback.
+A complete, production-ready AI-powered recruitment platform built for a hackathon. The platform automates end-to-end hiring with intelligent assessments, real-time evaluation, and personalized candidate feedback.
 
 ## ✅ Completion Status: 100%
 
@@ -75,7 +75,7 @@ A complete, production-ready AI-powered campus recruitment platform built for a 
 ## 📁 Project Structure
 
 ```
-campus-hiring/
+hirewave/
 ├── app/                          # Backend application
 │   ├── main.py                   # FastAPI entry point
 │   ├── config.py                 # Configuration

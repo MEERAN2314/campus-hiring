@@ -5,7 +5,7 @@ from typing import Optional
 
 class Settings(BaseSettings):
     # Application
-    APP_NAME: str = "Campus Hiring Platform"
+    APP_NAME: str = "HireWave"
     APP_ENV: str = "development"
     DEBUG: bool = True
     SECRET_KEY: str = "your-secret-key-change-this"
@@ -16,7 +16,7 @@ class Settings(BaseSettings):
     
     # Database
     MONGODB_URL: str = "mongodb://localhost:27017"
-    MONGODB_DB_NAME: str = "campus_hiring"
+    MONGODB_DB_NAME: str = "hirewave"
     
     # Redis
     REDIS_URL: str = "redis://localhost:6379/0"

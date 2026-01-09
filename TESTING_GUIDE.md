@@ -1,4 +1,4 @@
-# Testing Guide - Campus Hiring Platform
+# Testing Guide - HireWave
 
 ## Quick Testing Flow
 

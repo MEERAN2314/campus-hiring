@@ -1,12 +1,12 @@
 # 🎉 PROJECT COMPLETE! 🎉
 
-## Campus Hiring Platform - AI-Powered Recruitment
+## HireWave - AI-Powered Recruitment
 
 ---
 
 ## ✅ COMPLETION STATUS: 100%
 
-Your complete, production-ready AI-powered campus hiring platform is ready!
+Your complete, production-ready AI-powered hiring platform is ready!
 
 ---
 
@@ -443,7 +443,7 @@ Create these during demo:
 
 ## 🎊 Congratulations!
 
-You've successfully built a **complete, production-ready, AI-powered campus hiring platform** with:
+You've successfully built a **complete, production-ready, AI-powered hiring platform** with:
 
 ### ✨ Features
 - Real AI integration
@@ -521,6 +521,6 @@ This is your tagline. This is what makes you special.
 
 ---
 
-*Built with ❤️ for fair and intelligent campus hiring*
+*Built with ❤️ for fair and intelligent hiring*
 
 *Project completed: January 9, 2026*

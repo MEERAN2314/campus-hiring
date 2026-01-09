@@ -1,4 +1,4 @@
-// Main JavaScript for Campus Hiring Platform
+// Main JavaScript for HireWave
 
 // Check authentication on page load
 document.addEventListener('DOMContentLoaded', () => {

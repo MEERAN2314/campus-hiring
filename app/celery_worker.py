@@ -12,7 +12,7 @@ logger = logging.getLogger(__name__)
 
 # Initialize Celery
 celery_app = Celery(
-    "campus_hiring",
+    "hirewave",
     broker=settings.CELERY_BROKER_URL,
     backend=settings.CELERY_RESULT_BACKEND
 )

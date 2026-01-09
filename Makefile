@@ -1,9 +1,9 @@
-# Campus Hiring Platform - Makefile
+# HireWave - Makefile
 
 .PHONY: help setup install run celery docker-up docker-down clean test
 
 help:
-	@echo "Campus Hiring Platform - Available Commands"
+	@echo "HireWave - Available Commands"
 	@echo "============================================"
 	@echo "make setup       - Initial setup (create dirs, .env, install deps)"
 	@echo "make install     - Install dependencies"

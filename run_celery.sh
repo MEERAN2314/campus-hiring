@@ -1,6 +1,6 @@
 #!/bin/bash
 
-# Campus Hiring Platform - Celery Worker Script
+# HireWave - Celery Worker Script
 
 echo "Starting Celery Worker..."
 echo "Make sure Redis is running: redis-server"

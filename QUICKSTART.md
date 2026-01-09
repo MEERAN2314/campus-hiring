@@ -1,6 +1,6 @@
 # Quick Start Guide
 
-Get the Campus Hiring Platform running in 5 minutes!
+Get HireWave running in 5 minutes!
 
 ## Prerequisites
 
@@ -16,7 +16,7 @@ The fastest way to get started:
 ```bash
 # 1. Clone the repository
 git clone <repository-url>
-cd campus-hiring
+cd hirewave
 
 # 2. Create .env file
 cp .env.example .env
@@ -38,7 +38,7 @@ That's it! Access the application at **http://localhost:8000**
 ```bash
 # Clone repository
 git clone <repository-url>
-cd campus-hiring
+cd hirewave
 
 # Run setup script
 python3 setup.py
@@ -50,7 +50,7 @@ Edit `.env` file:
 ```bash
 GOOGLE_API_KEY=your-gemini-api-key-here
 MONGODB_URL=mongodb+srv://username:password@cluster0.xxxxx.mongodb.net/?retryWrites=true&w=majority
-MONGODB_DB_NAME=campus_hiring
+MONGODB_DB_NAME=hirewave
 REDIS_URL=redis://localhost:6379/0
 JWT_SECRET_KEY=change-this-to-a-random-secret-key
 ```
@@ -232,7 +232,7 @@ make help
 ## Project Structure
 
 ```
-campus-hiring/
+hirewave/
 ├── app/              # Backend code
 ├── templates/        # HTML templates
 ├── static/           # CSS, JS, images

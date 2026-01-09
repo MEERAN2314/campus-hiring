@@ -1,6 +1,6 @@
-# Campus Hiring Platform
+# HireWave
 
-An AI-powered recruitment platform that automates end-to-end campus hiring with intelligent assessment creation, evaluation, and candidate feedback.
+An AI-powered recruitment platform that automates end-to-end hiring with intelligent assessment creation, evaluation, and candidate feedback.
 
 ## Features
 

@@ -1,1 +1,1 @@
-# Campus Hiring Platform
+# HireWave

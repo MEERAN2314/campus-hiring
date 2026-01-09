@@ -1,11 +1,12 @@
 {% extends "base.html" %}
 
-{% block title %}Browse Jobs - Campus Hiring Platform{% endblock %}
+{% block title %}Browse Jobs - HireWave{% endblock %}
 
 {% block extra_css %}
 <style>
     .jobs-section {
         position: relative;
+        min-height: 60vh;
     }
 
     .jobs-header-banner {
@@ -66,6 +67,62 @@
 
     .job-card:hover .job-header h3 {
         color: var(--primary-blue);
+    }
+
+    /* Jobs Grid Container */
+    .jobs-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+        gap: 2rem;
+        width: 100%;
+    }
+
+    /* When empty state is the only child, center it */
+    .jobs-grid:has(.empty-state) {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+    }
+
+    /* Empty State Styling */
+    .empty-state {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        text-align: center;
+        padding: 4rem 2rem;
+        min-height: 300px;
+        background: linear-gradient(135deg, rgba(37, 99, 235, 0.05), rgba(255, 255, 255, 0.9));
+        border-radius: 20px;
+        border: 2px dashed var(--primary-blue);
+        margin: 2rem 0;
+        width: 100%;
+        max-width: 600px;
+    }
+
+    .empty-state::before {
+        content: '📭';
+        display: block;
+        font-size: 4rem;
+        margin-bottom: 1rem;
+        animation: bounce 2s infinite;
+    }
+
+    .empty-state-text {
+        color: var(--dark-gray);
+        font-size: 1.2rem;
+        font-weight: 500;
+        line-height: 1.6;
+    }
+
+    @keyframes bounce {
+        0%, 100% {
+            transform: translateY(0);
+        }
+        50% {
+            transform: translateY(-10px);
+        }
     }
 </style>
 {% endblock %}
@@ -134,10 +191,20 @@
         const container = document.getElementById('jobsList');
 
         if (jobs.length === 0) {
-            container.innerHTML = '<div class="empty-state">No jobs available at the moment. Check back soon!</div>';
+            container.style.display = 'flex';
+            container.style.justifyContent = 'center';
+            container.style.alignItems = 'center';
+            container.innerHTML = `
+                <div class="empty-state">
+                    <div class="empty-state-text">No jobs available at the moment. Check back soon!</div>
+                </div>
+            `;
             return;
         }
 
+        container.style.display = 'grid';
+        container.style.justifyContent = '';
+        container.style.alignItems = '';
         container.innerHTML = jobs.map((job, index) => `
         <div class="job-card magnetic">
             <div class="job-header">

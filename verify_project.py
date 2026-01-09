@@ -32,7 +32,7 @@ def count_files(pattern):
 
 def main():
     print("=" * 60)
-    print("Campus Hiring Platform - Project Verification")
+    print("HireWave - Project Verification")
     print("=" * 60)
     
     all_good = True
