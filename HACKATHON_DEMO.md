@@ -1,13 +1,13 @@
 # Hackathon Demo Guide 🏆
 
-## Project: Campus Hiring Platform
+## Project: HireWave
 **Tagline:** AI-Powered Fair Hiring with Personalized Candidate Growth
 
 ---
 
 ## 🎯 The Problem
 
-Campus hiring is:
+Hiring is:
 - ❌ Time-consuming (manual screening)
 - ❌ Biased (subjective evaluation)
 - ❌ Inefficient (generic tests)
@@ -21,7 +21,7 @@ Campus hiring is:
 ## 💡 Our Solution
 
 An AI-powered platform that:
-- ✅ Automates end-to-end campus hiring
+- ✅ Automates end-to-end hiring
 - ✅ Generates role-specific assessments
 - ✅ Evaluates with deep AI analysis
 - ✅ Ranks candidates fairly
@@ -62,7 +62,7 @@ An AI-powered platform that:
 
 ### Part 1: Introduction (1 min)
 **Say:**
-> "Campus hiring is broken. Companies spend weeks screening candidates manually, often missing great talent. Students get rejected without knowing why or how to improve. We built an AI-powered platform that solves both problems."
+> "Hiring is broken. Companies spend weeks screening candidates manually, often missing great talent. Students get rejected without knowing why or how to improve. We built an AI-powered platform that solves both problems."
 
 **Show:** Home page with features
 

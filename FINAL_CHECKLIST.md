@@ -487,7 +487,7 @@ make clean
 
 ## Congratulations! 🎉
 
-You've built a complete, production-ready AI-powered campus hiring platform with:
+You've built a complete, production-ready AI-powered hiring platform with:
 
 ✨ Real AI integration
 ✨ Beautiful design

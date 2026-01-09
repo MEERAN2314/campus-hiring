@@ -13,7 +13,7 @@
 1. **Clone and Setup**
 ```bash
 git clone <repository-url>
-cd campus-hiring
+cd hirewave
 python3 setup.py
 ```
 
@@ -118,7 +118,7 @@ mongodb+srv://<username>:<password>@<cluster>.mongodb.net/<dbname>?retryWrites=t
 
 **Heroku:**
 ```bash
-heroku create campus-hiring-app
+heroku create hirewave-app
 heroku addons:create heroku-redis:hobby-dev
 heroku config:set GOOGLE_API_KEY=your-key
 git push heroku main
@@ -132,8 +132,8 @@ git push heroku main
 
 **Google Cloud Run:**
 ```bash
-gcloud builds submit --tag gcr.io/PROJECT-ID/campus-hiring
-gcloud run deploy --image gcr.io/PROJECT-ID/campus-hiring --platform managed
+gcloud builds submit --tag gcr.io/PROJECT-ID/hirewave
+gcloud run deploy --image gcr.io/PROJECT-ID/hirewave --platform managed
 ```
 
 ## Environment Variables
@@ -203,10 +203,10 @@ MongoDB Atlas provides automatic backups:
 # Download from: https://www.mongodb.com/try/download/database-tools
 
 # Export database
-mongodump --uri="mongodb+srv://username:password@cluster.mongodb.net/campus_hiring" --out=/backup
+mongodump --uri="mongodb+srv://username:password@cluster.mongodb.net/hirewave" --out=/backup
 
 # Import database
-mongorestore --uri="mongodb+srv://username:password@cluster.mongodb.net/campus_hiring" /backup/campus_hiring
+mongorestore --uri="mongodb+srv://username:password@cluster.mongodb.net/hirewave" /backup/hirewave
 ```
 
 ## Troubleshooting

@@ -343,4 +343,4 @@ After setup:
 
 ---
 
-**You're all set! MongoDB Atlas is now powering your Campus Hiring Platform! 🚀**
+**You're all set! MongoDB Atlas is now powering your HireWave platform! 🚀**

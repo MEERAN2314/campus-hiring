@@ -218,7 +218,7 @@ async def seed_database():
     """Seed the database with sample data"""
     
     print("=" * 60)
-    print("Campus Hiring Platform - Database Seeding")
+    print("HireWave - Database Seeding")
     print("=" * 60)
     
     # Connect to MongoDB

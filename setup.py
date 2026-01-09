@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-Setup script for Campus Hiring Platform
+Setup script for HireWave
 """
 
 import os
@@ -47,7 +47,7 @@ def install_dependencies():
 def main():
     """Main setup function"""
     print("=" * 50)
-    print("Campus Hiring Platform - Setup")
+    print("HireWave - Setup")
     print("=" * 50)
     
     print("\n1. Creating directories...")

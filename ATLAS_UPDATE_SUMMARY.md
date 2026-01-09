@@ -2,7 +2,7 @@
 
 ## What Changed
 
-Your Campus Hiring Platform now uses **MongoDB Atlas** (cloud database) instead of local MongoDB.
+Your HireWave platform now uses **MongoDB Atlas** (cloud database) instead of local MongoDB.
 
 ---
 
