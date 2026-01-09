@@ -116,9 +116,15 @@ async def job_detail_page(request: Request, job_id: str):
 
 
 @app.get("/assessment/{application_id}", response_class=HTMLResponse)
-async def assessment_page(request: Request, application_id: str):
-    """Assessment taking page"""
-    return templates.TemplateResponse("assessment.html", {"request": request, "application_id": application_id})
+async def assessment_rules_page(request: Request, application_id: str):
+    """Assessment rules and guidelines page"""
+    return templates.TemplateResponse("assessment_rules.html", {"request": request, "application_id": application_id})
+
+
+@app.get("/assessment/take/{application_id}", response_class=HTMLResponse)
+async def assessment_proctored_page(request: Request, application_id: str):
+    """Proctored assessment taking page"""
+    return templates.TemplateResponse("assessment_proctored.html", {"request": request, "application_id": application_id})
 
 
 @app.get("/results/{application_id}", response_class=HTMLResponse)
