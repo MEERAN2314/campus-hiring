@@ -52,12 +52,32 @@ async function loadDashboard() {
         
         if (response.ok) {
             const applications = await response.json();
-            displayApplications(applications);
-            updateStats(applications);
+            
+            // Fetch job details for each application
+            const applicationsWithJobs = await Promise.all(
+                applications.map(async (app) => {
+                    try {
+                        const jobResponse = await fetch(`/api/jobs/${app.job_id}`, {
+                            headers: { 'Authorization': `Bearer ${token}` }
+                        });
+                        if (jobResponse.ok) {
+                            const job = await jobResponse.json();
+                            return { ...app, job };
+                        }
+                    } catch (e) {
+                        console.error('Error fetching job:', e);
+                    }
+                    return app;
+                })
+            );
+            
+            displayApplications(applicationsWithJobs);
+            updateStats(applicationsWithJobs);
         } else {
             document.getElementById('applicationsList').innerHTML = '<p>Failed to load applications</p>';
         }
     } catch (error) {
+        console.error('Error loading dashboard:', error);
         document.getElementById('applicationsList').innerHTML = '<p>Error loading applications</p>';
     }
 }
@@ -73,15 +93,18 @@ function displayApplications(applications) {
     container.innerHTML = applications.map(app => `
         <div class="application-card">
             <div class="application-header">
-                <h3>${app.job_id}</h3>
-                <span class="status-badge status-${app.status}">${app.status}</span>
+                <h3>${app.job ? app.job.title : app.job_id}</h3>
+                <span class="status-badge status-${app.status}">${app.status.replace(/_/g, ' ')}</span>
             </div>
+            ${app.job ? `
+                <p class="application-company">📍 ${app.job.company_name} - ${app.job.location}</p>
+            ` : ''}
             <p class="application-date">Applied: ${new Date(app.applied_at).toLocaleDateString()}</p>
             <div class="application-actions">
                 ${app.status === 'applied' ? `
-                    <a href="/assessment/${app.id}" class="btn btn-primary btn-small">Start Assessment</a>
+                    <a href="/assessment/${app._id || app.id}" class="btn btn-primary btn-small">Start Assessment</a>
                 ` : app.status === 'assessment_completed' || app.status === 'under_review' ? `
-                    <a href="/results/${app.id}" class="btn btn-outline btn-small">View Results</a>
+                    <a href="/results/${app._id || app.id}" class="btn btn-outline btn-small">View Results</a>
                 ` : ''}
             </div>
         </div>

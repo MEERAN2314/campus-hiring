@@ -69,7 +69,8 @@ function displayCandidates(results) {
                         <td><strong>#${result.rank}</strong></td>
                         <td>
                             <div class="candidate-info">
-                                <div class="candidate-name">Candidate ${result.candidate_id.substring(0, 8)}</div>
+                                <div class="candidate-name">${result.candidate_name || 'Candidate ' + result.candidate_id.substring(0, 8)}</div>
+                                ${result.candidate_email ? `<div class="candidate-email" style="font-size: 0.85em; color: #666;">${result.candidate_email}</div>` : ''}
                             </div>
                         </td>
                         <td>

@@ -37,3 +37,4 @@ class Application(ApplicationBase):
     class Config:
         populate_by_name = True
         json_encoders = {datetime: lambda v: v.isoformat()}
+        by_alias = False  # Use 'id' in JSON output

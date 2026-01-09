@@ -1,4 +1,5 @@
-import google.generativeai as genai
+from google import genai
+from google.genai import types
 from app.config import settings
 from typing import Dict, List, Any
 import json
@@ -6,14 +7,16 @@ import logging
 
 logger = logging.getLogger(__name__)
 
-# Configure Gemini
+# Configure Gemini client
+client = None
 if settings.GOOGLE_API_KEY:
-    genai.configure(api_key=settings.GOOGLE_API_KEY)
+    client = genai.Client(api_key=settings.GOOGLE_API_KEY)
 
 
 class EvaluationService:
     def __init__(self):
-        self.model = genai.GenerativeModel(settings.GEMINI_MODEL)
+        self.client = client
+        self.model = settings.GEMINI_MODEL
     
     async def evaluate_code(self, question: dict, answer: dict) -> dict:
         """Evaluate coding question with AI"""
@@ -53,7 +56,10 @@ Return ONLY valid JSON:
 """
         
         try:
-            response = self.model.generate_content(prompt)
+            response = self.client.models.generate_content(
+                model=self.model,
+                contents=prompt
+            )
             response_text = self._clean_json_response(response.text)
             result = json.loads(response_text)
             return result
@@ -93,7 +99,10 @@ Return ONLY valid JSON:
 """
         
         try:
-            response = self.model.generate_content(prompt)
+            response = self.client.models.generate_content(
+                model=self.model,
+                contents=prompt
+            )
             response_text = self._clean_json_response(response.text)
             result = json.loads(response_text)
             return result
@@ -141,7 +150,10 @@ Return ONLY valid JSON:
 """
         
         try:
-            response = self.model.generate_content(prompt)
+            response = self.client.models.generate_content(
+                model=self.model,
+                contents=prompt
+            )
             response_text = self._clean_json_response(response.text)
             result = json.loads(response_text)
             return result
@@ -181,7 +193,10 @@ Return ONLY valid JSON:
 """
         
         try:
-            response = self.model.generate_content(prompt)
+            response = self.client.models.generate_content(
+                model=self.model,
+                contents=prompt
+            )
             response_text = self._clean_json_response(response.text)
             result = json.loads(response_text)
             return result

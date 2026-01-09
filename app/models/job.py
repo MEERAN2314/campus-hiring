@@ -56,6 +56,8 @@ class Job(JobBase):
     class Config:
         populate_by_name = True
         json_encoders = {datetime: lambda v: v.isoformat()}
+        # This ensures 'id' is used in JSON output instead of '_id'
+        by_alias = False
 
 
 class JobResponse(JobBase):

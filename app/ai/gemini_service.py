@@ -1,21 +1,26 @@
-import google.generativeai as genai
+from google import genai
+from google.genai import types
 from app.config import settings
 import json
 import logging
 
 logger = logging.getLogger(__name__)
 
-# Configure Gemini
+# Configure Gemini client
+client = None
 if settings.GOOGLE_API_KEY:
-    genai.configure(api_key=settings.GOOGLE_API_KEY)
+    client = genai.Client(api_key=settings.GOOGLE_API_KEY)
 
 
 class GeminiService:
     def __init__(self):
-        self.model = genai.GenerativeModel(settings.GEMINI_MODEL)
+        self.client = client
+        self.model = settings.GEMINI_MODEL
     
     async def generate_assessment(self, job_data: dict) -> dict:
         """Generate assessment questions based on job requirements"""
+        
+        is_technical = job_data.get('job_type') == 'technical'
         
         prompt = f"""You are an expert technical recruiter and assessment designer. Create a comprehensive assessment for the following job role.
 
@@ -25,61 +30,61 @@ Required Skills: {', '.join(job_data['required_skills'])}
 Experience Level: {job_data['experience_level']}
 Job Description: {job_data['description']}
 
-Generate a balanced assessment with:
-- 10 MCQ questions (mix of easy, medium, hard)
-- 2 coding problems (1 medium, 1 hard) if technical role
-- 3 situational/behavioral questions
+Create exactly {'15 questions' if is_technical else '13 questions'} as follows:
+- 10 MCQ questions (3 easy, 4 medium, 3 hard)
+{'- 2 coding problems (1 medium, 1 hard)' if is_technical else ''}
+- 3 situational/behavioral questions (medium difficulty)
 
-For each question, provide:
-1. Question text
-2. Difficulty level
-3. Points (easy=5, medium=10, hard=15)
-4. For MCQ: 4 options with correct answer
-5. For coding: test cases and starter code
-6. Skill tags
-7. Rationale for why this question is relevant
+IMPORTANT: Generate ALL questions. Do not skip any.
 
-Return ONLY valid JSON in this exact format:
+For MCQ questions:
+- question_id: "q1", "q2", etc.
+- type: "mcq"
+- 4 options with option_id: "a", "b", "c", "d"
+- Specify correct_option_id
+
+For coding questions (if technical):
+- question_id: "q11", "q12"
+- type: "coding"
+- Include 2-3 test cases
+- Provide starter_code in Python
+- language: "python"
+
+For situational questions:
+- question_id: "q13", "q14", "q15" (or "q11", "q12", "q13" for non-technical)
+- type: "situational"
+
+Return ONLY valid JSON (no markdown, no explanation):
 {{
     "questions": [
         {{
             "question_id": "q1",
             "type": "mcq",
-            "question_text": "...",
+            "question_text": "What is the primary purpose of Python's GIL (Global Interpreter Lock)?",
             "difficulty": "easy",
             "points": 5,
             "options": [
-                {{"option_id": "a", "text": "..."}},
-                {{"option_id": "b", "text": "..."}},
-                {{"option_id": "c", "text": "..."}},
-                {{"option_id": "d", "text": "..."}}
+                {{"option_id": "a", "text": "To prevent memory leaks"}},
+                {{"option_id": "b", "text": "To ensure thread safety"}},
+                {{"option_id": "c", "text": "To improve performance"}},
+                {{"option_id": "d", "text": "To manage garbage collection"}}
             ],
-            "correct_option_id": "a",
-            "skill_tags": ["skill1", "skill2"],
-            "ai_rationale": "..."
-        }},
-        {{
-            "question_id": "q2",
-            "type": "coding",
-            "question_text": "...",
-            "difficulty": "medium",
-            "points": 10,
-            "test_cases": [
-                {{"input": "...", "expected_output": "...", "is_hidden": false}}
-            ],
-            "starter_code": "def solution():\\n    pass",
-            "language": "python",
-            "skill_tags": ["skill1"],
-            "ai_rationale": "..."
+            "correct_option_id": "b",
+            "skill_tags": ["Python", "Concurrency"],
+            "ai_rationale": "Tests understanding of Python internals"
         }}
     ],
     "total_points": 100,
     "estimated_duration": 60
 }}
-"""
+
+Generate ALL {15 if is_technical else 13} questions now."""
         
         try:
-            response = self.model.generate_content(prompt)
+            response = self.client.models.generate_content(
+                model=self.model,
+                contents=prompt
+            )
             response_text = response.text
             
             # Clean response and parse JSON
@@ -93,6 +98,12 @@ Return ONLY valid JSON in this exact format:
             response_text = response_text.strip()
             
             result = json.loads(response_text)
+            
+            # Validate we got enough questions
+            if len(result.get('questions', [])) < 5:
+                logger.warning(f"Only got {len(result.get('questions', []))} questions, using fallback")
+                return self._get_fallback_assessment(job_data)
+            
             return result
             
         except Exception as e:

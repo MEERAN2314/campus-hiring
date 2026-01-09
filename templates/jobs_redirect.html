@@ -1,0 +1,29 @@
+{% extends "base.html" %}
+
+{% block title %}Jobs - Campus Hiring Platform{% endblock %}
+
+{% block content %}
+<div style="display: flex; justify-content: center; align-items: center; min-height: 60vh;">
+    <div class="loading">Loading...</div>
+</div>
+
+<script>
+// Redirect based on user type
+const user = localStorage.getItem('user');
+
+if (user) {
+    const userData = JSON.parse(user);
+    
+    if (userData.user_type === 'recruiter') {
+        // Redirect recruiters to their jobs dashboard
+        window.location.replace('/recruiter/jobs');
+    } else {
+        // Load the jobs page for candidates
+        window.location.replace('/candidate/jobs');
+    }
+} else {
+    // Not logged in, show candidate jobs page
+    window.location.replace('/candidate/jobs');
+}
+</script>
+{% endblock %}

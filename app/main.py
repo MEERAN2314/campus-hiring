@@ -93,7 +93,13 @@ async def dashboard(request: Request):
 
 @app.get("/jobs", response_class=HTMLResponse)
 async def jobs_page(request: Request):
-    """Jobs listing page"""
+    """Jobs listing page - redirects based on user type"""
+    return templates.TemplateResponse("jobs_redirect.html", {"request": request})
+
+
+@app.get("/candidate/jobs", response_class=HTMLResponse)
+async def candidate_jobs_page(request: Request):
+    """Candidate jobs listing page"""
     return templates.TemplateResponse("jobs.html", {"request": request})
 
 

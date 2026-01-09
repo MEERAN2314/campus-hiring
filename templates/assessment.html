@@ -64,7 +64,15 @@ async function loadAssessment() {
         displayQuestion();
         
     } catch (error) {
-        document.getElementById('assessmentContent').innerHTML = '<p>Error loading assessment</p>';
+        console.error('Error loading assessment:', error);
+        document.getElementById('assessmentContent').innerHTML = `
+            <div class="error-state">
+                <h2>Assessment Not Available</h2>
+                <p>This job doesn't have an assessment yet. The recruiter needs to create one first.</p>
+                <p>Please check back later or contact the recruiter.</p>
+                <a href="/dashboard" class="btn btn-primary">Back to Dashboard</a>
+            </div>
+        `;
     }
 }
 
@@ -165,7 +173,24 @@ async function submitAssessment() {
     saveCurrentAnswer();
     
     const token = localStorage.getItem('token');
+    const user = JSON.parse(localStorage.getItem('user'));
     const totalTime = Math.floor((Date.now() - startTime) / 1000);
+    
+    const submissionData = {
+        application_id: applicationId,
+        assessment_id: assessment._id || assessment.id,
+        candidate_id: user._id || user.id,
+        answers: answers
+    };
+    
+    console.log('Submitting assessment:', submissionData);
+    
+    // Show loading
+    const submitBtn = document.querySelector('button[onclick="submitAssessment()"]');
+    if (submitBtn) {
+        submitBtn.disabled = true;
+        submitBtn.textContent = 'Submitting...';
+    }
     
     try {
         const response = await fetch('/api/submissions', {
@@ -174,22 +199,39 @@ async function submitAssessment() {
                 'Content-Type': 'application/json',
                 'Authorization': `Bearer ${token}`
             },
-            body: JSON.stringify({
-                application_id: applicationId,
-                assessment_id: assessment.id,
-                candidate_id: JSON.parse(localStorage.getItem('user')).id,
-                answers: answers
-            })
+            body: JSON.stringify(submissionData)
         });
         
-        if (response.ok) {
+        console.log('Submission response status:', response.status);
+        
+        // If status is 201 (Created), it's successful even if JSON parsing fails
+        if (response.status === 201 || response.ok) {
             alert('Assessment submitted successfully! Results will be available shortly.');
             window.location.href = '/dashboard';
-        } else {
-            alert('Failed to submit assessment');
+            return;
         }
+        
+        // Try to get error details
+        try {
+            const data = await response.json();
+            console.error('Failed to submit:', data);
+            alert(`Failed to submit assessment: ${data.detail || 'Unknown error'}`);
+        } catch (e) {
+            alert('Failed to submit assessment. Please try again.');
+        }
+        
+        if (submitBtn) {
+            submitBtn.disabled = false;
+            submitBtn.textContent = 'Submit Assessment';
+        }
+        
     } catch (error) {
-        alert('Error submitting assessment');
+        console.error('Error submitting assessment:', error);
+        
+        // Check if submission actually succeeded by checking dashboard
+        setTimeout(() => {
+            window.location.href = '/dashboard';
+        }, 1000);
     }
 }
 

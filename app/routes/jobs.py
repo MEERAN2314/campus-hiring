@@ -1,12 +1,25 @@
 from fastapi import APIRouter, HTTPException, status, Depends
-from typing import List
+from typing import List, Optional
 from app.models.job import JobCreate, JobUpdate, Job, JobResponse, JobStatus
 from app.utils.auth import get_current_recruiter, get_current_user
 from app.database import get_database
 from app.utils.helpers import generate_id
 from datetime import datetime
+from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
 
 router = APIRouter(prefix="/jobs", tags=["Jobs"])
+security = HTTPBearer(auto_error=False)  # Make auth optional
+
+
+async def get_optional_current_user(credentials: Optional[HTTPAuthorizationCredentials] = Depends(security)):
+    """Get current user if authenticated, None otherwise"""
+    if credentials:
+        from app.utils.auth import decode_access_token
+        try:
+            return decode_access_token(credentials.credentials)
+        except:
+            return None
+    return None
 
 
 @router.post("", response_model=Job, status_code=status.HTTP_201_CREATED)
@@ -43,21 +56,26 @@ async def list_jobs(
     job_type: str = None,
     skip: int = 0,
     limit: int = 20,
-    current_user=Depends(get_current_user)
+    current_user=Depends(get_optional_current_user)
 ):
     """List all jobs (filtered for candidates, all for recruiters)"""
     db = get_database()
     
     query = {}
     
-    # If candidate, only show active jobs
-    if current_user.user_type == "candidate":
-        query["status"] = JobStatus.ACTIVE.value
+    # If user is authenticated
+    if current_user:
+        # If candidate, only show active jobs
+        if current_user.user_type == "candidate":
+            query["status"] = JobStatus.ACTIVE.value
+        else:
+            # Recruiter sees their own jobs
+            user = await db.users.find_one({"email": current_user.email})
+            if user:
+                query["company_id"] = user["_id"]
     else:
-        # Recruiter sees their own jobs
-        user = await db.users.find_one({"email": current_user.email})
-        if user:
-            query["company_id"] = user["_id"]
+        # Not authenticated - show only active jobs
+        query["status"] = JobStatus.ACTIVE.value
     
     if status:
         query["status"] = status
@@ -70,13 +88,18 @@ async def list_jobs(
 
 
 @router.get("/{job_id}", response_model=Job)
-async def get_job(job_id: str, current_user=Depends(get_current_user)):
+async def get_job(job_id: str, current_user=Depends(get_optional_current_user)):
     """Get job details"""
     db = get_database()
     
     job = await db.jobs.find_one({"_id": job_id})
     if not job:
         raise HTTPException(status_code=404, detail="Job not found")
+    
+    # If not authenticated or candidate, only show active jobs
+    if not current_user or current_user.user_type == "candidate":
+        if job.get("status") != JobStatus.ACTIVE.value:
+            raise HTTPException(status_code=404, detail="Job not found")
     
     return Job(**job)
 

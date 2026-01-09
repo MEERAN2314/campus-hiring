@@ -42,14 +42,14 @@ async def get_result_by_application(
     return Result(**result)
 
 
-@router.get("/job/{job_id}/rankings", response_model=List[Result])
+@router.get("/job/{job_id}/rankings")
 async def get_job_rankings(
     job_id: str,
     skip: int = 0,
     limit: int = 100,
     current_user=Depends(get_current_recruiter)
 ):
-    """Get ranked results for a job"""
+    """Get ranked results for a job with candidate names"""
     db = get_database()
     
     # Verify job belongs to recruiter
@@ -67,10 +67,19 @@ async def get_job_rankings(
         {"application_id": {"$in": application_ids}}
     ).sort("percentage", -1).skip(skip).limit(limit).to_list(limit)
     
-    # Add rank
+    # Add rank and fetch candidate names
     for idx, result in enumerate(results, start=skip + 1):
         result["rank"] = idx
         result["total_candidates"] = len(application_ids)
+        
+        # Fetch candidate name
+        candidate = await db.users.find_one({"_id": result["candidate_id"]})
+        if candidate:
+            result["candidate_name"] = candidate.get("name", "Unknown")
+            result["candidate_email"] = candidate.get("email", "")
+        else:
+            result["candidate_name"] = "Unknown"
+            result["candidate_email"] = ""
     
     # Update ranks in database
     for result in results:
@@ -79,7 +88,8 @@ async def get_job_rankings(
             {"$set": {"rank": result["rank"], "total_candidates": result["total_candidates"]}}
         )
     
-    return [Result(**result) for result in results]
+    # Convert to dict for JSON response (bypass Pydantic model)
+    return results
 
 
 @router.get("/{result_id}", response_model=Result)

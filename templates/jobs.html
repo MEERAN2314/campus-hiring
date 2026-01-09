@@ -27,16 +27,29 @@
 let allJobs = [];
 
 async function loadJobs() {
+    const token = localStorage.getItem('token');
+    
+    const headers = {};
+    if (token) {
+        headers['Authorization'] = `Bearer ${token}`;
+    }
+    
     try {
-        const response = await fetch('/api/jobs?status=active');
+        const response = await fetch('/api/jobs?status=active', {
+            headers: headers
+        });
         
         if (response.ok) {
             allJobs = await response.json();
             displayJobs(allJobs);
+        } else if (response.status === 401) {
+            // Not authenticated, redirect to login
+            window.location.href = '/login?redirect=/jobs';
         } else {
             document.getElementById('jobsList').innerHTML = '<p>Failed to load jobs</p>';
         }
     } catch (error) {
+        console.error('Error loading jobs:', error);
         document.getElementById('jobsList').innerHTML = '<p>Error loading jobs</p>';
     }
 }
@@ -64,7 +77,7 @@ function displayJobs(jobs) {
             <p class="job-description">${job.description.substring(0, 150)}...</p>
             <div class="job-footer">
                 <span class="job-date">${new Date(job.created_at).toLocaleDateString()}</span>
-                <a href="/jobs/${job.id}" class="btn btn-primary btn-small">View Details</a>
+                <a href="/jobs/${job._id || job.id}" class="btn btn-primary btn-small">View Details</a>
             </div>
         </div>
     `).join('');

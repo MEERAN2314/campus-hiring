@@ -108,11 +108,11 @@ function displayJobs(jobs) {
             </div>
             <div class="job-actions">
                 ${!job.assessment_id ? `
-                    <button onclick="createAssessment('${job.id}')" class="btn btn-primary btn-small">Create Assessment</button>
+                    <button onclick="createAssessment('${job._id || job.id}')" class="btn btn-primary btn-small">Create Assessment</button>
                 ` : job.status === 'draft' ? `
-                    <button onclick="publishJob('${job.id}')" class="btn btn-primary btn-small">Publish Job</button>
+                    <button onclick="publishJob('${job._id || job.id}')" class="btn btn-primary btn-small">Publish Job</button>
                 ` : ''}
-                <a href="/recruiter/candidates/${job.id}" class="btn btn-outline btn-small">View Candidates</a>
+                <a href="/recruiter/candidates/${job._id || job.id}" class="btn btn-outline btn-small">View Candidates</a>
             </div>
         </div>
     `).join('');
@@ -167,11 +167,19 @@ document.getElementById('createJobForm').addEventListener('submit', async (e) =>
 async function createAssessment(jobId) {
     const token = localStorage.getItem('token');
     
-    if (!confirm('Create AI-generated assessment for this job?')) {
+    if (!confirm('Create AI-generated assessment for this job? This may take 30-60 seconds.')) {
         return;
     }
     
+    // Show loading state
+    const btn = event.target;
+    const originalText = btn.textContent;
+    btn.disabled = true;
+    btn.textContent = 'Generating...';
+    
     try {
+        console.log('Creating assessment for job:', jobId);
+        
         const response = await fetch('/api/assessments', {
             method: 'POST',
             headers: {
@@ -184,14 +192,23 @@ async function createAssessment(jobId) {
             })
         });
         
+        const data = await response.json();
+        console.log('Response:', response.status, data);
+        
         if (response.ok) {
             alert('Assessment created successfully!');
             loadJobs();
         } else {
-            alert('Failed to create assessment');
+            console.error('Failed to create assessment:', data);
+            alert(`Failed to create assessment: ${data.detail || 'Unknown error'}`);
+            btn.disabled = false;
+            btn.textContent = originalText;
         }
     } catch (error) {
-        alert('Error creating assessment');
+        console.error('Error creating assessment:', error);
+        alert(`Error creating assessment: ${error.message}`);
+        btn.disabled = false;
+        btn.textContent = originalText;
     }
 }
 

@@ -13,9 +13,12 @@ function checkAuth() {
     const navAuth = document.getElementById('navAuth');
     const navUser = document.getElementById('navUser');
     const dashboardLink = document.getElementById('dashboardLink');
+    const jobsLink = document.getElementById('jobsLink');
     
     if (token && user) {
         const userData = JSON.parse(user);
+        console.log('User data:', userData); // Debug log
+        console.log('User type:', userData.user_type); // Debug log
         
         // Show user menu
         if (navAuth) navAuth.style.display = 'none';
@@ -25,11 +28,23 @@ function checkAuth() {
         }
         if (dashboardLink) dashboardLink.style.display = 'block';
         
+        // Set Jobs link based on user type
+        if (jobsLink) {
+            if (userData.user_type === 'recruiter') {
+                console.log('Setting jobs link to /recruiter/jobs'); // Debug log
+                jobsLink.href = '/recruiter/jobs';
+            } else {
+                console.log('Setting jobs link to /jobs'); // Debug log
+                jobsLink.href = '/jobs';
+            }
+        }
+        
     } else {
         // Show auth buttons
         if (navAuth) navAuth.style.display = 'flex';
         if (navUser) navUser.style.display = 'none';
         if (dashboardLink) dashboardLink.style.display = 'none';
+        if (jobsLink) jobsLink.href = '/jobs';
     }
 }
 
