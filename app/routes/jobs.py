@@ -4,7 +4,7 @@ from app.models.job import JobCreate, JobUpdate, Job, JobResponse, JobStatus
 from app.utils.auth import get_current_recruiter, get_current_user
 from app.database import get_database
 from app.utils.helpers import generate_id
-from datetime import datetime
+from datetime import datetime, timezone
 from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
 
 router = APIRouter(prefix="/jobs", tags=["Jobs"])
@@ -41,8 +41,8 @@ async def create_job(job_data: JobCreate, current_user=Depends(get_current_recru
         "status": JobStatus.DRAFT,
         "assessment_id": None,
         "applications_count": 0,
-        "created_at": datetime.utcnow(),
-        "updated_at": datetime.utcnow()
+        "created_at": datetime.now(timezone.utc),
+        "updated_at": datetime.now(timezone.utc)
     })
     
     await db.jobs.insert_one(job_dict)
@@ -123,7 +123,7 @@ async def update_job(
     
     # Update job
     update_data = {k: v for k, v in job_update.model_dump(exclude_unset=True).items() if v is not None}
-    update_data["updated_at"] = datetime.utcnow()
+    update_data["updated_at"] = datetime.now(timezone.utc)
     
     await db.jobs.update_one({"_id": job_id}, {"$set": update_data})
     
@@ -167,7 +167,7 @@ async def publish_job(job_id: str, current_user=Depends(get_current_recruiter)):
     
     await db.jobs.update_one(
         {"_id": job_id},
-        {"$set": {"status": JobStatus.ACTIVE.value, "updated_at": datetime.utcnow()}}
+        {"$set": {"status": JobStatus.ACTIVE.value, "updated_at": datetime.now(timezone.utc)}}
     )
     
     updated_job = await db.jobs.find_one({"_id": job_id})

@@ -2,6 +2,140 @@
 
 {% block title %}My Jobs - Recruiter Dashboard{% endblock %}
 
+{% block extra_css %}
+<style>
+    /* Toggle Switch Styling */
+    .job-status-toggle {
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+        margin-top: 1rem;
+        padding: 0.75rem;
+        background: linear-gradient(135deg, rgba(37, 99, 235, 0.05), rgba(255, 255, 255, 0.9));
+        border-radius: 12px;
+        border: 1px solid #e2e8f0;
+    }
+
+    .toggle-label {
+        font-size: 0.9rem;
+        font-weight: 600;
+        color: var(--dark-gray);
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+
+    .toggle-switch {
+        position: relative;
+        display: inline-block;
+        width: 52px;
+        height: 28px;
+    }
+
+    .toggle-switch input {
+        opacity: 0;
+        width: 0;
+        height: 0;
+    }
+
+    .toggle-slider {
+        position: absolute;
+        cursor: pointer;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background-color: #cbd5e1;
+        transition: 0.3s;
+        border-radius: 28px;
+        box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.1);
+    }
+
+    .toggle-slider:before {
+        position: absolute;
+        content: "";
+        height: 20px;
+        width: 20px;
+        left: 4px;
+        bottom: 4px;
+        background-color: white;
+        transition: 0.3s;
+        border-radius: 50%;
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+    }
+
+    .toggle-switch input:checked + .toggle-slider {
+        background: linear-gradient(135deg, var(--primary-blue), var(--accent-blue));
+    }
+
+    .toggle-switch input:checked + .toggle-slider:before {
+        transform: translateX(24px);
+    }
+
+    .toggle-switch input:disabled + .toggle-slider {
+        opacity: 0.5;
+        cursor: not-allowed;
+    }
+
+    .toggle-status-text {
+        font-size: 0.85rem;
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        min-width: 60px;
+    }
+
+    .toggle-status-text.active {
+        color: var(--success);
+    }
+
+    .toggle-status-text.draft {
+        color: var(--warning);
+    }
+
+    .toggle-info {
+        font-size: 0.8rem;
+        color: var(--gray);
+        margin-left: auto;
+        display: flex;
+        align-items: center;
+        gap: 0.25rem;
+    }
+
+    .toggle-disabled-message {
+        font-size: 0.8rem;
+        color: var(--danger);
+        margin-top: 0.5rem;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+
+    /* Toast Animation */
+    @keyframes slideIn {
+        from {
+            transform: translateX(400px);
+            opacity: 0;
+        }
+        to {
+            transform: translateX(0);
+            opacity: 1;
+        }
+    }
+
+    @keyframes slideOut {
+        from {
+            transform: translateX(0);
+            opacity: 1;
+        }
+        to {
+            transform: translateX(400px);
+            opacity: 0;
+        }
+    }
+</style>
+{% endblock %}
+
 {% block content %}
 <section class="recruiter-section">
     <div class="container">
@@ -95,7 +229,12 @@ function displayJobs(jobs) {
         return;
     }
     
-    container.innerHTML = jobs.map(job => `
+    container.innerHTML = jobs.map(job => {
+        const isActive = job.status === 'active';
+        const hasAssessment = !!job.assessment_id;
+        const canToggle = hasAssessment; // Can only toggle if assessment exists
+        
+        return `
         <div class="recruiter-job-card">
             <div class="job-header">
                 <h3>${job.title}</h3>
@@ -106,16 +245,49 @@ function displayJobs(jobs) {
                 <span><i data-lucide="users" class="icon icon-sm"></i> ${job.applications_count} Applications</span>
                 <span><i data-lucide="map-pin" class="icon icon-sm"></i> ${job.location}</span>
             </div>
+            
+            <!-- Job Status Toggle -->
+            <div class="job-status-toggle">
+                <label class="toggle-label">
+                    <i data-lucide="power" class="icon icon-sm"></i>
+                    Job Status:
+                </label>
+                <label class="toggle-switch">
+                    <input 
+                        type="checkbox" 
+                        ${isActive ? 'checked' : ''} 
+                        ${!canToggle ? 'disabled' : ''}
+                        onchange="toggleJobStatus('${job._id || job.id}', this.checked)"
+                    >
+                    <span class="toggle-slider"></span>
+                </label>
+                <span class="toggle-status-text ${isActive ? 'active' : 'draft'}">
+                    ${isActive ? 'Active' : 'Draft'}
+                </span>
+                ${canToggle ? `
+                    <span class="toggle-info">
+                        <i data-lucide="info" class="icon icon-xs"></i>
+                        Toggle to ${isActive ? 'hide' : 'publish'}
+                    </span>
+                ` : ''}
+            </div>
+            
+            ${!canToggle ? `
+                <div class="toggle-disabled-message">
+                    <i data-lucide="alert-circle" class="icon icon-sm"></i>
+                    Create an assessment first to activate this job
+                </div>
+            ` : ''}
+            
             <div class="job-actions">
                 ${!job.assessment_id ? `
                     <button onclick="createAssessment('${job._id || job.id}')" class="btn btn-primary btn-small">Create Assessment</button>
-                ` : job.status === 'draft' ? `
-                    <button onclick="publishJob('${job._id || job.id}')" class="btn btn-primary btn-small">Publish Job</button>
                 ` : ''}
                 <a href="/recruiter/candidates/${job._id || job.id}" class="btn btn-outline btn-small">View Candidates</a>
             </div>
         </div>
-    `).join('');
+    `;
+    }).join('');
 }
 
 function showCreateJobModal() {
@@ -209,6 +381,65 @@ async function createAssessment(jobId) {
         alert(`Error creating assessment: ${error.message}`);
         btn.disabled = false;
         btn.textContent = originalText;
+    }
+}
+
+async function toggleJobStatus(jobId, makeActive) {
+    const token = localStorage.getItem('token');
+    
+    try {
+        const newStatus = makeActive ? 'active' : 'draft';
+        
+        const response = await fetch(`/api/jobs/${jobId}`, {
+            method: 'PUT',
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${token}`
+            },
+            body: JSON.stringify({
+                status: newStatus
+            })
+        });
+        
+        if (response.ok) {
+            // Show success message
+            const message = makeActive ? 'Job activated! It\'s now visible to candidates.' : 'Job set to draft. It\'s hidden from candidates.';
+            
+            // Create a temporary toast notification
+            const toast = document.createElement('div');
+            toast.style.cssText = `
+                position: fixed;
+                top: 20px;
+                right: 20px;
+                background: ${makeActive ? '#10b981' : '#f59e0b'};
+                color: white;
+                padding: 1rem 1.5rem;
+                border-radius: 8px;
+                box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+                z-index: 10000;
+                animation: slideIn 0.3s ease;
+            `;
+            toast.textContent = message;
+            document.body.appendChild(toast);
+            
+            setTimeout(() => {
+                toast.style.animation = 'slideOut 0.3s ease';
+                setTimeout(() => toast.remove(), 300);
+            }, 3000);
+            
+            // Reload jobs to reflect changes
+            loadJobs();
+        } else {
+            const data = await response.json();
+            alert(`Failed to update job status: ${data.detail || 'Unknown error'}`);
+            // Reload to reset toggle state
+            loadJobs();
+        }
+    } catch (error) {
+        console.error('Error toggling job status:', error);
+        alert('Error updating job status');
+        // Reload to reset toggle state
+        loadJobs();
     }
 }
 
