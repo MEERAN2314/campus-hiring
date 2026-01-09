@@ -8,25 +8,20 @@ echo "Starting Campus Hiring Platform..."
 if [ ! -f .env ]; then
     echo "Creating .env file from .env.example..."
     cp .env.example .env
-    echo "Please update .env with your configuration (especially GOOGLE_API_KEY)"
+    echo "⚠️  Please update .env with your configuration:"
+    echo "   - GOOGLE_API_KEY (Gemini API key)"
+    echo "   - MONGODB_URL (MongoDB Atlas connection string)"
+    exit 1
 fi
 
-# Check if virtual environment exists
-if [ ! -d "venv" ]; then
-    echo "Creating virtual environment..."
-    python3 -m venv venv
-fi
-
-# Activate virtual environment
-source venv/bin/activate
-
-# Install dependencies
-echo "Installing dependencies..."
-pip install -r requirements.txt
+# Install dependencies if needed
+echo "Checking dependencies..."
+pip install -q -r requirements.txt
 
 # Create necessary directories
 mkdir -p uploads static/css static/js templates
 
 # Run the application
 echo "Starting FastAPI server..."
+echo "Access at: http://localhost:8000"
 uvicorn app.main:app --host 0.0.0.0 --port 8000 --reload

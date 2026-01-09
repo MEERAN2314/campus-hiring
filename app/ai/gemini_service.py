@@ -1,34 +1,29 @@
-from langchain_google_genai import ChatGoogleGenerativeAI
-from langchain.prompts import PromptTemplate
-from langchain.chains import LLMChain
+import google.generativeai as genai
 from app.config import settings
 import json
 import logging
 
 logger = logging.getLogger(__name__)
 
+# Configure Gemini
+if settings.GOOGLE_API_KEY:
+    genai.configure(api_key=settings.GOOGLE_API_KEY)
+
 
 class GeminiService:
     def __init__(self):
-        self.llm = ChatGoogleGenerativeAI(
-            model=settings.GEMINI_MODEL,
-            google_api_key=settings.GOOGLE_API_KEY,
-            temperature=0.7,
-            convert_system_message_to_human=True
-        )
+        self.model = genai.GenerativeModel(settings.GEMINI_MODEL)
     
     async def generate_assessment(self, job_data: dict) -> dict:
         """Generate assessment questions based on job requirements"""
         
-        prompt = PromptTemplate(
-            input_variables=["job_title", "job_type", "skills", "experience_level", "description"],
-            template="""You are an expert technical recruiter and assessment designer. Create a comprehensive assessment for the following job role.
+        prompt = f"""You are an expert technical recruiter and assessment designer. Create a comprehensive assessment for the following job role.
 
-Job Title: {job_title}
-Job Type: {job_type}
-Required Skills: {skills}
-Experience Level: {experience_level}
-Job Description: {description}
+Job Title: {job_data['title']}
+Job Type: {job_data['job_type']}
+Required Skills: {', '.join(job_data['required_skills'])}
+Experience Level: {job_data['experience_level']}
+Job Description: {job_data['description']}
 
 Generate a balanced assessment with:
 - 10 MCQ questions (mix of easy, medium, hard)
@@ -82,30 +77,22 @@ Return ONLY valid JSON in this exact format:
     "estimated_duration": 60
 }}
 """
-        )
-        
-        chain = LLMChain(llm=self.llm, prompt=prompt)
         
         try:
-            response = await chain.arun(
-                job_title=job_data["title"],
-                job_type=job_data["job_type"],
-                skills=", ".join(job_data["required_skills"]),
-                experience_level=job_data["experience_level"],
-                description=job_data["description"]
-            )
+            response = self.model.generate_content(prompt)
+            response_text = response.text
             
             # Clean response and parse JSON
-            response = response.strip()
-            if response.startswith("```json"):
-                response = response[7:]
-            if response.startswith("```"):
-                response = response[3:]
-            if response.endswith("```"):
-                response = response[:-3]
-            response = response.strip()
+            response_text = response_text.strip()
+            if response_text.startswith("```json"):
+                response_text = response_text[7:]
+            if response_text.startswith("```"):
+                response_text = response_text[3:]
+            if response_text.endswith("```"):
+                response_text = response_text[:-3]
+            response_text = response_text.strip()
             
-            result = json.loads(response)
+            result = json.loads(response_text)
             return result
             
         except Exception as e:

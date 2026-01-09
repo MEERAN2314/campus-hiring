@@ -1,6 +1,4 @@
-from langchain_google_genai import ChatGoogleGenerativeAI
-from langchain.prompts import PromptTemplate
-from langchain.chains import LLMChain
+import google.generativeai as genai
 from app.config import settings
 from typing import Dict, List, Any
 import json
@@ -8,29 +6,26 @@ import logging
 
 logger = logging.getLogger(__name__)
 
+# Configure Gemini
+if settings.GOOGLE_API_KEY:
+    genai.configure(api_key=settings.GOOGLE_API_KEY)
+
 
 class EvaluationService:
     def __init__(self):
-        self.llm = ChatGoogleGenerativeAI(
-            model=settings.GEMINI_MODEL,
-            google_api_key=settings.GOOGLE_API_KEY,
-            temperature=0.3,  # Lower temperature for more consistent evaluation
-            convert_system_message_to_human=True
-        )
+        self.model = genai.GenerativeModel(settings.GEMINI_MODEL)
     
     async def evaluate_code(self, question: dict, answer: dict) -> dict:
         """Evaluate coding question with AI"""
         
-        prompt = PromptTemplate(
-            input_variables=["question", "code", "test_cases"],
-            template="""You are an expert code reviewer. Evaluate the following code submission.
+        prompt = f"""You are an expert code reviewer. Evaluate the following code submission.
 
-Question: {question}
+Question: {question['question_text']}
 
 Submitted Code:
-{code}
+{answer.get('code', '')}
 
-Test Cases: {test_cases}
+Test Cases: {json.dumps(question.get('test_cases', []))}
 
 Evaluate the code on:
 1. Correctness (0-100): Does it solve the problem?
@@ -56,19 +51,11 @@ Return ONLY valid JSON:
     "detailed_feedback": "The solution correctly solves the problem..."
 }}
 """
-        )
-        
-        chain = LLMChain(llm=self.llm, prompt=prompt)
         
         try:
-            response = await chain.arun(
-                question=question["question_text"],
-                code=answer.get("code", ""),
-                test_cases=json.dumps(question.get("test_cases", []))
-            )
-            
-            response = self._clean_json_response(response)
-            result = json.loads(response)
+            response = self.model.generate_content(prompt)
+            response_text = self._clean_json_response(response.text)
+            result = json.loads(response_text)
             return result
             
         except Exception as e:
@@ -78,15 +65,13 @@ Return ONLY valid JSON:
     async def evaluate_descriptive(self, question: dict, answer: dict) -> dict:
         """Evaluate descriptive/situational answer with AI"""
         
-        prompt = PromptTemplate(
-            input_variables=["question", "answer", "skill_tags"],
-            template="""You are an expert HR interviewer. Evaluate this candidate's response.
+        prompt = f"""You are an expert HR interviewer. Evaluate this candidate's response.
 
-Question: {question}
-Skills Being Assessed: {skill_tags}
+Question: {question['question_text']}
+Skills Being Assessed: {', '.join(question.get('skill_tags', []))}
 
 Candidate's Answer:
-{answer}
+{answer.get('text_answer', '')}
 
 Evaluate on:
 1. Relevance (0-100): How well does it answer the question?
@@ -106,19 +91,11 @@ Return ONLY valid JSON:
     "detailed_feedback": "The candidate demonstrates..."
 }}
 """
-        )
-        
-        chain = LLMChain(llm=self.llm, prompt=prompt)
         
         try:
-            response = await chain.arun(
-                question=question["question_text"],
-                answer=answer.get("text_answer", ""),
-                skill_tags=", ".join(question.get("skill_tags", []))
-            )
-            
-            response = self._clean_json_response(response)
-            result = json.loads(response)
+            response = self.model.generate_content(prompt)
+            response_text = self._clean_json_response(response.text)
+            result = json.loads(response_text)
             return result
             
         except Exception as e:
@@ -128,19 +105,17 @@ Return ONLY valid JSON:
     async def generate_overall_feedback(self, candidate_data: dict, results: dict) -> dict:
         """Generate personalized feedback report"""
         
-        prompt = PromptTemplate(
-            input_variables=["candidate_name", "job_title", "score", "skill_scores", "question_feedback"],
-            template="""You are a career coach providing constructive feedback to a job candidate.
+        prompt = f"""You are a career coach providing constructive feedback to a job candidate.
 
-Candidate: {candidate_name}
-Position: {job_title}
-Overall Score: {score}/100
+Candidate: {candidate_data.get('name', 'Candidate')}
+Position: {candidate_data.get('job_title', 'this position')}
+Overall Score: {results.get('percentage', 0)}/100
 
 Skill Performance:
-{skill_scores}
+{json.dumps(results.get('skill_scores', []))}
 
 Question-wise Feedback:
-{question_feedback}
+{json.dumps(results.get('question_feedback', []))}
 
 Generate a comprehensive, encouraging feedback report with:
 1. Top 3 strengths
@@ -164,21 +139,11 @@ Return ONLY valid JSON:
     "next_steps": ["Step 1", "Step 2", "Step 3"]
 }}
 """
-        )
-        
-        chain = LLMChain(llm=self.llm, prompt=prompt)
         
         try:
-            response = await chain.arun(
-                candidate_name=candidate_data.get("name", "Candidate"),
-                job_title=candidate_data.get("job_title", "this position"),
-                score=results.get("percentage", 0),
-                skill_scores=json.dumps(results.get("skill_scores", [])),
-                question_feedback=json.dumps(results.get("question_feedback", []))
-            )
-            
-            response = self._clean_json_response(response)
-            result = json.loads(response)
+            response = self.model.generate_content(prompt)
+            response_text = self._clean_json_response(response.text)
+            result = json.loads(response_text)
             return result
             
         except Exception as e:
@@ -188,14 +153,12 @@ Return ONLY valid JSON:
     async def generate_ai_reasoning(self, candidate_data: dict, results: dict, all_candidates: List[dict]) -> dict:
         """Generate AI reasoning for ranking"""
         
-        prompt = PromptTemplate(
-            input_variables=["candidate_name", "score", "skills", "total_candidates"],
-            template="""You are an AI recruitment analyst. Explain why this candidate received their ranking.
+        prompt = f"""You are an AI recruitment analyst. Explain why this candidate received their ranking.
 
-Candidate: {candidate_name}
-Score: {score}/100
-Skills Performance: {skills}
-Total Candidates: {total_candidates}
+Candidate: {candidate_data.get('name', 'Candidate')}
+Score: {results.get('percentage', 0)}/100
+Skills Performance: {json.dumps(results.get('skill_scores', []))}
+Total Candidates: {len(all_candidates)}
 
 Provide:
 1. Overall assessment (2-3 sentences)
@@ -216,20 +179,11 @@ Return ONLY valid JSON:
     "prediction": "High likelihood of success based on strong technical foundation and problem-solving skills"
 }}
 """
-        )
-        
-        chain = LLMChain(llm=self.llm, prompt=prompt)
         
         try:
-            response = await chain.arun(
-                candidate_name=candidate_data.get("name", "Candidate"),
-                score=results.get("percentage", 0),
-                skills=json.dumps(results.get("skill_scores", [])),
-                total_candidates=len(all_candidates)
-            )
-            
-            response = self._clean_json_response(response)
-            result = json.loads(response)
+            response = self.model.generate_content(prompt)
+            response_text = self._clean_json_response(response.text)
+            result = json.loads(response_text)
             return result
             
         except Exception as e:
