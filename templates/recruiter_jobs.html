@@ -103,8 +103,8 @@ function displayJobs(jobs) {
             </div>
             <p>${job.description.substring(0, 150)}...</p>
             <div class="job-stats">
-                <span>📊 ${job.applications_count} Applications</span>
-                <span>📍 ${job.location}</span>
+                <span><i data-lucide="users" class="icon icon-sm"></i> ${job.applications_count} Applications</span>
+                <span><i data-lucide="map-pin" class="icon icon-sm"></i> ${job.location}</span>
             </div>
             <div class="job-actions">
                 ${!job.assessment_id ? `

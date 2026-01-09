@@ -5,9 +5,19 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>{% block title %}Campus Hiring Platform{% endblock %}</title>
     <link rel="stylesheet" href="/static/css/style.css">
+    <link rel="stylesheet" href="/static/css/animations.css">
+    <!-- Lucide Icons -->
+    <script src="https://unpkg.com/lucide@latest"></script>
     {% block extra_css %}{% endblock %}
 </head>
 <body>
+    <!-- Animated Background -->
+    <div class="orb-container" style="pointer-events: none; z-index: -1;">
+        <div class="orb orb-1"></div>
+        <div class="orb orb-2"></div>
+        <div class="orb orb-3"></div>
+    </div>
+    
     <nav class="navbar">
         <div class="container">
             <div class="nav-brand">
@@ -34,7 +44,7 @@
         </div>
     </nav>
 
-    <main>
+    <main style="position: relative; z-index: 1;">
         {% block content %}{% endblock %}
     </main>
 
@@ -46,5 +56,20 @@
 
     <script src="/static/js/main.js"></script>
     {% block extra_js %}{% endblock %}
+    
+    <!-- Initialize Lucide Icons -->
+    <script>
+    lucide.createIcons();
+    </script>
+    
+    <!-- Spotlight Effect Script -->
+    <script>
+    document.addEventListener('mousemove', (e) => {
+        const x = (e.clientX / window.innerWidth) * 100;
+        const y = (e.clientY / window.innerHeight) * 100;
+        document.documentElement.style.setProperty('--mouse-x', x + '%');
+        document.documentElement.style.setProperty('--mouse-y', y + '%');
+    });
+    </script>
 </body>
 </html>

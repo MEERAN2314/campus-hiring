@@ -72,6 +72,9 @@
     opacity: 0.95;
     margin-bottom: 0.5rem;
     font-weight: 600;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
 }
 
 .job-location-info {
@@ -196,8 +199,12 @@
 }
 
 .colleges-list li::before {
-    content: '🎓';
-    font-size: 1.2rem;
+    content: '';
+    width: 6px;
+    height: 6px;
+    background: var(--primary-blue);
+    border-radius: 50%;
+    margin-right: 0.75rem;
 }
 
 .colleges-list li:hover {
@@ -295,8 +302,8 @@ function displayJobDetail(job) {
                     <h1>${job.title}</h1>
                     <span class="job-type-badge-large">${job.job_type}</span>
                 </div>
-                <div class="job-company-info">📍 ${job.company_name}</div>
-                <div class="job-location-info">🌍 ${job.location}</div>
+                <div class="job-company-info"><i data-lucide="building-2" class="icon icon-md"></i> ${job.company_name}</div>
+                <div class="job-location-info"><i data-lucide="map-pin" class="icon icon-md"></i> ${job.location}</div>
             </div>
         </div>
         
@@ -322,12 +329,12 @@ function displayJobDetail(job) {
         </div>
         
         <div class="job-content-card">
-            <h2>📋 Job Description</h2>
+            <h2><i data-lucide="file-text" class="section-icon"></i> Job Description</h2>
             <p class="job-description">${job.description}</p>
         </div>
         
         <div class="job-content-card">
-            <h2>💼 Required Skills</h2>
+            <h2><i data-lucide="code-2" class="section-icon"></i> Required Skills</h2>
             <div class="skills-grid">
                 ${job.required_skills.map(skill => `<span class="skill-tag-large">${skill}</span>`).join('')}
             </div>
@@ -335,7 +342,7 @@ function displayJobDetail(job) {
         
         ${job.target_colleges && job.target_colleges.length > 0 ? `
             <div class="job-content-card">
-                <h2>🎓 Target Colleges</h2>
+                <h2><i data-lucide="graduation-cap" class="section-icon"></i> Target Colleges</h2>
                 <ul class="colleges-list">
                     ${job.target_colleges.map(college => `<li>${college}</li>`).join('')}
                 </ul>
@@ -349,8 +356,12 @@ function displayJobDetail(job) {
                         Ready to take the next step in your career?
                     </div>
                     <div class="job-actions-buttons">
-                        <button onclick="window.history.back()" class="btn btn-outline">← Back to Jobs</button>
-                        <button onclick="applyToJob()" class="btn btn-primary btn-large" id="applyBtn">Apply Now →</button>
+                        <button onclick="window.history.back()" class="btn btn-outline">
+                            <i data-lucide="arrow-left" class="icon icon-sm"></i> Back to Jobs
+                        </button>
+                        <button onclick="applyToJob()" class="btn btn-primary btn-large" id="applyBtn">
+                            Apply Now <i data-lucide="send" class="icon icon-sm"></i>
+                        </button>
                     </div>
                 </div>
             </div>

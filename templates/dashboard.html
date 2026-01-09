@@ -123,9 +123,10 @@
     gap: 0.5rem;
 }
 
-.dashboard-content h2::before {
-    content: '📋';
-    font-size: 1.8rem;
+.dashboard-content h2 i {
+    width: 28px;
+    height: 28px;
+    color: var(--primary-blue);
 }
 
 .applications-list {
@@ -262,29 +263,37 @@
         
         <div class="dashboard-stats">
             <div class="stat-card">
-                <div class="stat-icon">📝</div>
+                <div class="stat-icon-container">
+                    <i data-lucide="file-text"></i>
+                </div>
                 <div class="stat-value" id="appliedCount">0</div>
                 <div class="stat-label">Total Applications</div>
             </div>
             <div class="stat-card">
-                <div class="stat-icon">⏳</div>
+                <div class="stat-icon-container">
+                    <i data-lucide="clock"></i>
+                </div>
                 <div class="stat-value" id="pendingCount">0</div>
                 <div class="stat-label">Pending</div>
             </div>
             <div class="stat-card">
-                <div class="stat-icon">✅</div>
+                <div class="stat-icon-container">
+                    <i data-lucide="check-circle"></i>
+                </div>
                 <div class="stat-value" id="completedCount">0</div>
                 <div class="stat-label">Completed</div>
             </div>
             <div class="stat-card">
-                <div class="stat-icon">⭐</div>
+                <div class="stat-icon-container">
+                    <i data-lucide="star"></i>
+                </div>
                 <div class="stat-value" id="shortlistedCount">0</div>
                 <div class="stat-label">Shortlisted</div>
             </div>
         </div>
         
         <div class="dashboard-content">
-            <h2>My Applications</h2>
+            <h2><i data-lucide="briefcase"></i> My Applications</h2>
             <div id="applicationsList" class="applications-list">
                 <div class="loading">Loading your applications...</div>
             </div>
@@ -365,9 +374,9 @@ function displayApplications(applications) {
                 <span class="status-badge status-${app.status}">${app.status.replace(/_/g, ' ').toUpperCase()}</span>
             </div>
             ${app.job ? `
-                <p class="application-company">🏢 ${app.job.company_name} • 📍 ${app.job.location}</p>
+                <p class="application-company"><i data-lucide="building-2" class="icon icon-sm"></i> ${app.job.company_name} • <i data-lucide="map-pin" class="icon icon-sm"></i> ${app.job.location}</p>
             ` : ''}
-            <p class="application-date">📅 Applied on ${new Date(app.applied_at).toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' })}</p>
+            <p class="application-date"><i data-lucide="calendar" class="icon icon-sm"></i> Applied on ${new Date(app.applied_at).toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' })}</p>
             <div class="application-actions">
                 ${app.status === 'applied' ? `
                     <a href="/assessment/${app._id || app.id}" class="btn btn-primary">Start Assessment →</a>
@@ -375,7 +384,7 @@ function displayApplications(applications) {
                     <a href="/results/${app._id || app.id}" class="btn btn-primary">View Results →</a>
                 ` : app.status === 'shortlisted' ? `
                     <a href="/results/${app._id || app.id}" class="btn btn-primary">View Results →</a>
-                    <span style="color: var(--success); font-weight: 600;">🎉 Congratulations!</span>
+                    <span style="color: var(--success); font-weight: 600;">Congratulations!</span>
                 ` : ''}
                 ${app.job ? `
                     <a href="/jobs/${app.job_id}" class="btn btn-outline">View Job Details</a>
