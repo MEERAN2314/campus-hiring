@@ -6,19 +6,50 @@ from fastapi import Depends, HTTPException, status
 from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
 from app.config import settings
 from app.models.user import TokenData, UserType
+import hashlib
 
 pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 security = HTTPBearer()
 
 
+def _truncate_password(password: str) -> bytes:
+    """
+    Truncate password to 72 bytes for bcrypt compatibility.
+    Uses SHA256 hash for long passwords to maintain security.
+    """
+    password_bytes = password.encode('utf-8')
+    
+    # If password is longer than 72 bytes, hash it first
+    if len(password_bytes) > 72:
+        # Use SHA256 to create a fixed-length hash
+        return hashlib.sha256(password_bytes).hexdigest().encode('utf-8')
+    
+    return password_bytes
+
+
 def verify_password(plain_password: str, hashed_password: str) -> bool:
     """Verify a password against its hash"""
-    return pwd_context.verify(plain_password, hashed_password)
+    try:
+        # Truncate password if needed
+        password_to_verify = _truncate_password(plain_password).decode('utf-8')
+        return pwd_context.verify(password_to_verify, hashed_password)
+    except Exception as e:
+        print(f"Password verification error: {e}")
+        return False
 
 
 def get_password_hash(password: str) -> str:
     """Hash a password"""
-    return pwd_context.hash(password)
+    try:
+        # Truncate password if needed
+        password_to_hash = _truncate_password(password).decode('utf-8')
+        return pwd_context.hash(password_to_hash)
+    except Exception as e:
+        print(f"Password hashing error: {e}")
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail="Error hashing password"
+        )
 
 
 def create_access_token(data: dict, expires_delta: Optional[timedelta] = None) -> str:
